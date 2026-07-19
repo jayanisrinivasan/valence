@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VALENCE — Periodic Table of AI Political Economy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --paper:#F2EFE6;--paper2:#EAE7DC;--paper3:#E0DDD0;--paper4:#D8D4C4;
+  --ink:#111110;--ink2:#3A3835;--ink3:#5A5750;--ink4:#888480;
+  --rule:#BDB9AC;--rule2:#A8A49A;
+  /* Family colors — per VALENCE UI spec */
+  --f1:#C0352C;   /* Rapid substituters */
+  --f2:#C55A32;   /* Workflow decomposers */
+  --f3:#5B45C4;   /* Transition occupations */
+  --fgov:#3E4B91; /* Governance-sensitive (cols 9-10) */
+  --f10:#3E4B91;  /* Network former / governance */
+  --f11:#763568;  /* Bottleneck custodians */
+  --f12:#A33A5D;  /* Care and trust */
+  --f13:#7A5C00;  /* Platform capture / Halogens */
+  --f14:#2D6B3E;  /* Institutionally protected / Noble gases */
+  --flan:#365B71; /* Hidden infrastructure */
+  --fact:#263D63; /* Critical systems */
+  --acc:#2A2A8A;--grn:#1A6A38;--amb:#816000;--red:#B83A32;--ora:#C55A32;
+  --serif:'DM Serif Display',serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;-webkit-font-smoothing:antialiased}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* NAV */
+.nav{display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--rule);flex-shrink:0;background:var(--paper)}
+.logo{font-family:var(--serif);font-size:24px;letter-spacing:.1em;padding:12px 0 10px;margin-right:24px;color:var(--ink);font-weight:600}
+.logo em{color:var(--acc);font-style:normal}
+.vtag{font-family:var(--mono);font-size:7.5px;color:var(--grn);border:1px solid var(--grn);padding:1px 5px;border-radius:2px;margin-left:4px;vertical-align:2px}
+.nav-tabs{display:flex}
+.nt{background:none;border:none;border-bottom:2px solid transparent;color:var(--ink2);cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;padding:12px 16px 10px;transition:color .12s;margin-bottom:-1px}
+.nt:hover{color:var(--ink)}.nt.act{color:var(--acc);border-bottom-color:var(--acc);font-weight:500}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.srch input{width:210px;padding:7px 12px;background:var(--paper2);border:1px solid var(--rule2);border-radius:4px;color:var(--ink);font-size:13px;outline:none;transition:border-color .15s}
+.srch input:focus{border-color:var(--acc)}
+.srch input::placeholder{color:var(--ink4)}
+.srch button{padding:7px 14px;background:var(--ink);border:none;border-radius:4px;color:var(--paper);font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.07em;cursor:pointer;transition:opacity .15s}
+.srch button:hover{opacity:.78}
+
+/* SUGGEST */
+.sug{display:none;padding:6px 28px;background:rgba(122,80,16,.06);border-bottom:1px solid rgba(122,80,16,.18);font-size:11px;color:var(--amb);gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.sug.vis{display:flex}
+.sc{padding:2px 9px;background:var(--paper2);border:1px solid var(--rule2);border-radius:12px;font-size:10px;color:var(--ink2);cursor:pointer}
+.sc:hover{border-color:var(--acc);color:var(--acc)}
+
+/* PAGES */
+.page{display:none;flex:1;overflow:hidden;flex-direction:column}
+.page.act{display:flex}
+
+/* ══ TABLE PAGE ══════════════════════════════════════ */
+.legend{padding:7px 28px;border-bottom:1px solid var(--rule);display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--ink3);flex-shrink:0}
+.li{display:flex;align-items:center;gap:4px}
+.lg{width:46px;height:6px;border-radius:2px;background:linear-gradient(to right,var(--grn),var(--amb),var(--red))}
+.ls{width:14px;height:14px;border-radius:2px}
+
+.table-main{flex:1;display:flex;overflow:hidden;min-height:0}
+.tpane{flex:1;overflow:auto;padding:14px 28px 20px;min-width:0;position:relative}
+
+/* BLOCK HEADER ROW */
+.blk-hdr{display:flex;gap:6px;margin-bottom:5px}
+.bh{font-family:var(--sans);font-size:10px;color:var(--ink3);text-align:center;padding-bottom:5px;border-bottom:2px solid var(--rule);letter-spacing:.01em;flex-shrink:0;font-weight:500}
+
+/* PERIOD ROWS */
+.pt-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.pl{width:90px;flex-shrink:0;font-family:var(--sans);font-size:10px;color:var(--ink2);text-align:right;padding-right:10px;line-height:1.4;font-weight:600}
+
+/* ELEMENT CELLS */
+.el{width:118px;height:118px;border-radius:4px;border:1px solid var(--rule);padding:7px 7px 5px;display:flex;flex-direction:column;cursor:pointer;flex-shrink:0;position:relative;transition:transform .08s,box-shadow .12s;background:var(--paper2);border-top-width:3px}
+.el:hover{transform:scale(1.13);z-index:10;box-shadow:0 3px 12px rgba(28,28,20,.18)}
+.el.hl{transform:scale(1.15);z-index:20;box-shadow:0 0 0 2px var(--acc);border-color:var(--acc)!important}
+.el.dm{opacity:.15;pointer-events:none}
+/* confidence shown via badge, not opacity — all cards full opacity */
+/* family left stripe */
+.el[data-f="1"]{border-left:3px solid var(--f1)}
+.el[data-f="2"]{border-left:3px solid var(--f2)}
+.el[data-f="T"]{border-left:3px solid var(--f3)}
+.el[data-f="10"]{border-left:3px solid var(--f10)}
+.el[data-f="11"]{border-left:3px solid var(--f11)}
+.el[data-f="12"]{border-left:3px solid var(--f12)}
+.el[data-f="13"]{border-left:3px solid var(--f13)}
+.el[data-f="14"]{border-left:3px solid var(--f14)}
+.el[data-f="Ln"]{border-left:3px solid var(--flan)}
+.el[data-f="Ac"]{border-left:3px solid var(--fact)}
+.el{border-top-width:3px}
+/* block tints */
+.el[data-f="1"],.el[data-f="2"]{background:color-mix(in srgb,var(--f1) 5%,var(--paper2))}
+.el[data-f="13"]{background:color-mix(in srgb,var(--f13) 6%,var(--paper2))}
+.el[data-f="14"]{background:color-mix(in srgb,var(--f14) 6%,var(--paper2))}
+.el[data-f="12"]{background:color-mix(in srgb,var(--f12) 5%,var(--paper2))}
+.el[data-f="11"]{background:color-mix(in srgb,var(--f11) 5%,var(--paper2))}
+.el[data-f="Ln"]{background:color-mix(in srgb,var(--flan) 5%,var(--paper2))}
+.el[data-f="Ac"]{background:color-mix(in srgb,var(--fact) 5%,var(--paper2))}
+.el-ox{position:absolute;top:5px;left:6px;font-family:var(--mono);font-size:9px;color:var(--ink);font-weight:700}
+.el-trs{position:absolute;bottom:5px;left:6px;font-family:var(--mono);font-size:9px;color:var(--ink2);font-weight:600}
+.el-sym{font-family:var(--serif);font-size:30px;color:var(--ink);text-align:center;line-height:1;margin-top:4px;font-weight:600}
+.el-name{font-size:11px;color:var(--ink);text-align:center;margin-top:3px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:500}
+.el-pvci{position:absolute;bottom:5px;right:6px;font-family:var(--mono);font-size:9px;color:var(--ink2)}
+.el-conf{position:absolute;top:5px;right:6px;font-family:var(--mono);font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px}
+.el-gap{width:118px;height:118px;flex-shrink:0}
+
+
+/* SAMPLE ELEMENT */
+.sample-wrap{display:flex;align-items:flex-start;gap:28px;margin:0 0 20px 94px;padding:16px 20px 18px;background:var(--paper2);border:1px solid var(--rule);border-radius:6px;max-width:660px;position:relative}
+.sample-title{font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:11px}
+.sc{width:118px;height:118px;border-radius:4px;border:2px solid var(--rule);border-top:3px solid #816000;border-left:3px solid #816000;padding:7px 7px 5px;display:flex;flex-direction:column;flex-shrink:0;position:relative;background:color-mix(in srgb,#816000 7%,var(--paper2))}
+.sc .sox{position:absolute;top:5px;left:6px;font-family:var(--mono);font-size:9px;color:var(--grn);font-weight:600}
+.sc .scf{position:absolute;top:5px;right:6px;font-family:var(--mono);font-size:8px;font-weight:600;color:var(--grn)}
+.sc .ssym{font-family:var(--serif);font-size:30px;color:var(--ink);text-align:center;line-height:1;margin-top:18px}
+.sc .snm{font-size:11px;color:var(--ink2);text-align:center;margin-top:3px;line-height:1.25}
+.sc .strs{position:absolute;bottom:5px;left:6px;font-family:var(--mono);font-size:9px;color:var(--ink3)}
+.sc .spvc{position:absolute;bottom:5px;right:6px;font-family:var(--mono);font-size:9px;color:var(--ink3)}
+.sann{display:flex;flex-direction:column;gap:7px;flex:1;min-width:0}
+.arow{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.45}
+.akey{font-family:var(--mono);font-size:10px;font-weight:600;min-width:76px;flex-shrink:0;padding-top:1px;color:var(--ink3)}
+.aval{color:var(--ink2);flex:1}
+.aval strong{color:var(--ink);font-weight:600}
+.sdismiss{position:absolute;top:10px;right:12px;background:none;font-family:var(--mono);font-size:9px;color:var(--ink4);cursor:pointer;padding:2px 6px;border:1px solid var(--rule);border-radius:2px}
+.sdismiss:hover{color:var(--ink);border-color:var(--ink3)}
+/* STAIRCASE */
+.stair-lbl{font-family:var(--sans);font-size:11px;color:var(--ink2);margin-top:10px;padding-left:96px;letter-spacing:.01em;font-style:italic;font-weight:500}
+
+/* F-BLOCK */
+.fblock-section{padding:8px 28px 4px;border-top:1px dashed var(--rule2);flex-shrink:0}
+.fblock-label{font-family:var(--mono);font-size:8px;color:var(--ink4);margin-bottom:5px;display:flex;align-items:center;gap:12px}
+.fblock-bracket{font-family:var(--mono);font-size:9px;color:var(--ink4)}
+.fblock-rows{display:flex;gap:6px;flex-direction:column}
+.fblock-row{display:flex;gap:6px;align-items:center}
+.fblock-row-lbl{width:90px;flex-shrink:0;font-family:var(--sans);font-size:11px;color:var(--ink3);text-align:right;padding-right:10px;font-weight:500}
+.fblock-connector{font-family:var(--sans);font-size:12px;color:var(--ink3);padding-left:96px;font-style:italic}
+
+/* ══ PANEL ═══════════════════════════════════════════ */
+.panel{width:0;overflow:hidden;border-left:none;transition:width .28s cubic-bezier(.16,1,.3,1);flex-shrink:0;background:var(--paper);display:flex;flex-direction:column}
+.panel.open{width:500px;border-left:1px solid var(--rule);overflow-y:auto}
+.pi{padding:24px 26px 40px;min-width:500px}
+.pc{float:right;background:none;border:1px solid var(--rule2);border-radius:3px;color:var(--ink3);font-family:var(--mono);font-size:8.5px;padding:3px 7px;cursor:pointer;margin-top:2px}
+.pc:hover{border-color:var(--ink);color:var(--ink)}
+.p-sym{font-family:var(--serif);font-size:46px;line-height:1;margin:8px 0 5px;clear:right}
+.p-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.p-meta{font-family:var(--mono);font-size:9px;color:var(--ink3)}
+.p-fam{margin-top:5px;font-size:9.5px;font-style:italic}
+.p-hl{margin-top:8px;padding:8px 10px;background:var(--paper2);border-left:3px solid var(--acc);border-radius:0 3px 3px 0;font-size:11px;line-height:1.55;color:var(--ink2)}
+.p-hl strong{display:block;font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.ev-row{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.ev{font-family:var(--mono);font-size:7px;padding:2px 5px;border-radius:2px;border:1px solid currentColor;letter-spacing:.03em}
+.ev-obs{color:var(--grn)}.ev-est{color:var(--acc)}.ev-pri{color:var(--amb)}.ev-scn{color:var(--ink3)}
+
+.tabs{display:flex;border-bottom:1px solid var(--rule);margin:12px 0 12px}
+.tb{background:none;border:none;border-bottom:2px solid transparent;color:var(--ink3);cursor:pointer;font-family:var(--sans);font-size:10.5px;padding:6px 10px;transition:color .12s;margin-bottom:-1px}
+.tb:hover{color:var(--ink)}.tb.act{color:var(--acc);border-bottom-color:var(--acc);font-weight:500}
+.tp{display:none}.tp.act{display:block}
+
+.sec{font-family:var(--mono);font-size:10px;color:var(--ink2);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 11px;padding-bottom:6px;border-bottom:1.5px solid var(--rule)}
+.sec:first-child{margin-top:0}
+
+.pr{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.prl{width:128px;flex-shrink:0;line-height:1.3}
+.prl strong{display:block;font-size:11px;font-weight:500}
+.prl span{font-size:9px;color:var(--ink3)}
+.pbg{flex:1;height:5px;background:var(--paper3);border-radius:2px;overflow:hidden;position:relative}
+.pbf{height:100%;border-radius:2px}
+/* uncertainty band overlay */
+.pband{position:absolute;top:0;height:100%;border-radius:2px;opacity:.2}
+.pv{font-family:var(--mono);font-size:9.5px;width:26px;text-align:right;color:var(--ink2)}
+.pn{font-size:9px;color:var(--ink3);line-height:1.45;margin:1px 0 9px 135px;font-style:italic}
+
+.formula{font-family:var(--mono);font-size:8px;background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:7px 10px;margin-bottom:9px;color:var(--ink2);line-height:1.7}
+.formula .v{color:var(--acc)}
+.obs-card{background:rgba(26,106,56,.06);border:1px solid rgba(26,106,56,.2);border-radius:4px;padding:9px 11px;margin-bottom:10px}
+.obs-ttl{font-family:var(--mono);font-size:7.5px;color:var(--grn);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.or{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:9.5px}
+.or .l{width:116px;flex-shrink:0;color:var(--ink2)}
+.mb{flex:1;height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.mf{height:100%;border-radius:2px}
+.on{font-family:var(--mono);font-size:9px;width:28px;text-align:right}
+.shell-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:9px}
+.shc{background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:5px 3px;text-align:center}
+.sh-n{font-family:var(--serif);font-size:15px;line-height:1}
+.sh-l{font-size:6.5px;color:var(--ink3);margin-top:2px;line-height:1.3}
+.ox-wrap{display:flex;align-items:center;gap:7px;margin:8px 0}
+.ox-l{font-size:9.5px;color:var(--ink3);width:128px;flex-shrink:0}
+.ox-states{display:flex;gap:3px}
+.ox-s{width:20px;height:20px;border-radius:2px;border:1px solid var(--rule2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7.5px;color:var(--ink4);background:var(--paper2)}
+.ox-s.act{border-color:currentColor;font-weight:500}
+.ox-d{font-size:9px;color:var(--ink3);font-style:italic}
+
+/* PVCI decomp */
+.pvc-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:9px}
+.pvc-row .l{width:120px;flex-shrink:0;color:var(--ink2)}
+.pvc-row .w{width:20px;text-align:right;color:var(--ink4);font-family:var(--mono);font-size:8px}
+.pvc-bg{flex:1;height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.pvc-fill{height:100%;border-radius:2px;background:var(--amb)}
+.pvc-v{font-family:var(--mono);font-size:8.5px;width:22px;text-align:right}
+
+/* FORECAST */
+.lir-row{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.lir-n{font-family:var(--serif);font-size:40px;line-height:1}
+.lir-m{font-size:9.5px;color:var(--ink3);max-width:220px;line-height:1.5}
+.chart-leg{display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.chart-leg span{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--ink3)}
+.cl{width:16px;height:2px;border-radius:1px;display:inline-block}
+.cw{position:relative;width:100%;height:170px;margin-bottom:7px}
+
+/* CAPTURE */
+.cpc{background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;margin-bottom:10px}
+.cpc-ttl{font-family:var(--mono);font-size:7.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.cpr{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:9.5px}
+.cpa{width:112px;flex-shrink:0;color:var(--ink2)}
+.cpbg{flex:1;height:5px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.cpb{height:100%;border-radius:2px}
+.cpp{font-family:var(--mono);font-size:8.5px;width:22px;text-align:right}
+
+/* CASCADE / REACTIONS */
+.cas-item{padding:8px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:3px;margin-bottom:6px;cursor:pointer;transition:border-color .12s}
+.cas-item:hover{border-color:var(--acc)}
+.cas-arrow{font-family:var(--sans);font-size:20px;color:var(--acc);margin:0 8px;font-weight:300;opacity:.8}
+.cas-strength{font-family:var(--mono);font-size:8.5px;padding:1px 5px;border-radius:2px;background:var(--paper3);color:var(--ink3);margin-left:6px}
+.cas-desc{font-size:9.5px;color:var(--ink2);margin-top:3px;line-height:1.45}
+
+/* CATALYSTS */
+.cat-item{padding:8px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:3px;margin-bottom:6px}
+.cat-name{font-size:11px;font-weight:500;margin-bottom:2px}
+.cat-meta{font-family:var(--mono);font-size:8px;color:var(--amb);margin-bottom:4px}
+.cat-effect{font-size:9.5px;color:var(--ink2);line-height:1.45}
+
+/* ISOTOPES */
+.iso-card{background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:9px 11px;margin-bottom:7px}
+.iso-title{font-size:11px;font-weight:500;margin-bottom:2px}
+.iso-meta{font-family:var(--mono);font-size:8px;color:var(--ink3);margin-bottom:5px}
+.iso-bars{display:flex;gap:6px;margin-bottom:3px}
+.iso-bw{flex:1}
+.iso-bl{font-size:7.5px;color:var(--ink3);margin-bottom:2px}
+.iso-bg{height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.iso-bf{height:100%;border-radius:2px}
+.iso-note{font-size:9px;color:var(--ink2);line-height:1.5}
+
+/* POLICY */
+.pol-card{background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;margin-bottom:10px}
+.pol-ttl{font-family:var(--mono);font-size:7.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.pol-row{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.pol-n{font-size:9.5px;color:var(--ink);width:136px;flex-shrink:0;line-height:1.3}
+.pol-n small{display:block;font-size:8px;color:var(--ink3);margin-top:1px}
+.pol-row input[type=range]{flex:1;height:3px;cursor:pointer;accent-color:var(--acc)}
+.pol-v{font-family:var(--mono);font-size:9px;width:24px;text-align:right;color:var(--acc)}
+.pol-reset{font-family:var(--mono);font-size:8px;padding:2px 7px;background:none;border:1px solid var(--rule2);border-radius:3px;color:var(--ink3);cursor:pointer}
+.pol-reset:hover{border-color:var(--ink);color:var(--ink)}
+.sce{border-left:2px solid var(--rule);padding:6px 9px;margin-bottom:6px;font-size:9.5px;line-height:1.55;color:var(--ink2)}
+.sce strong{display:block;font-size:10px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.sc-g{border-left-color:var(--grn)}.sc-m{border-left-color:var(--amb)}.sc-b{border-left-color:var(--red)}
+
+/* NEIGHBORS */
+.nbr{display:flex;align-items:center;gap:8px;padding:6px 9px;background:var(--paper2);border:1px solid var(--rule);border-radius:3px;cursor:pointer;margin-bottom:4px;transition:border-color .12s}
+.nbr:hover{border-color:var(--acc)}
+.nbr-sym{font-family:var(--serif);font-size:17px;width:24px;flex-shrink:0}
+.nbr-info{flex:1}
+.nbr-name{font-size:10.5px;font-weight:500}
+.nbr-why{font-size:8.5px;color:var(--ink3)}
+
+.note{font-size:9px;color:var(--ink4);background:var(--paper2);border-radius:3px;padding:7px 9px;line-height:1.6;margin-top:7px}
+
+/* ══ VALIDATION PAGE ══════════════════════════════════ */
+.vpage{flex:1;overflow-y:auto;padding:28px 36px}
+.vh{font-family:var(--serif);font-size:22px;margin-bottom:5px}
+.vs{font-size:11px;color:var(--ink3);margin-bottom:24px;font-style:italic;max-width:600px;line-height:1.5}
+.pred-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
+.pcard{background:var(--paper2);border:1px solid var(--rule);border-left:4px solid var(--acc);border-radius:0 6px 6px 0;padding:16px 18px;margin-bottom:2px;transition:box-shadow .12s}
+.pcard-hdr{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.pcard-sym{font-family:var(--serif);font-size:30px;line-height:1;font-weight:600}
+.pcard-title{font-size:13.5px;font-weight:700;color:var(--ink)}
+.pcard-claim{font-size:11.5px;color:var(--ink);line-height:1.6;margin-bottom:10px}
+.pcard-ev{background:var(--paper3);border-radius:4px;padding:9px 11px;font-size:10.5px;color:var(--ink2);line-height:1.55}
+.pcard-ev strong{display:block;font-family:var(--mono);font-size:9px;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:700}
+.pcard-status{display:flex;align-items:center;gap:6px;margin-top:10px;font-family:var(--mono);font-size:10px}
+.sdot{width:7px;height:7px;border-radius:50%}
+.sp{color:var(--ink3)}.dp{background:var(--ink4)}
+.sconf{color:var(--grn)}.dconf{background:var(--grn)}
+.spart{color:var(--amb)}.dpart{background:var(--amb)}
+
+.bt{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:10.5px}
+.bt th{font-family:var(--mono);font-size:8px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;padding:5px 9px;border-bottom:1px solid var(--rule2);text-align:left;background:var(--paper2)}
+.bt td{padding:7px 9px;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:top}
+.bt tr:hover td{background:var(--paper2)}
+
+.mc{background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin-bottom:18px}
+.mc-ttl{font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px}
+.mc-row{display:flex;gap:14px;margin-bottom:7px;font-size:10.5px}
+.mc-l{color:var(--ink3);width:155px;flex-shrink:0;font-family:var(--mono);font-size:9px}
+.mc-v{color:var(--ink2);flex:1;line-height:1.5}
+
+/* FOOTER */
+.footer{padding:7px 28px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:9px;color:var(--ink3);display:flex;gap:14px;flex-wrap:wrap;flex-shrink:0}
+
+/* MOBILE SPLASH */
+@media (max-width: 767px) {
+  .app { display: none !important; }
+  .mobile-splash { display: flex !important; }
+}
+.mobile-splash {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 28px;
+  text-align: center;
+  background: var(--paper);
+}
+.ms-logo { font-family: var(--serif); font-size: 48px; letter-spacing: .1em; margin-bottom: 8px; }
+.ms-logo em { color: var(--acc); font-style: normal; }
+.ms-tagline { font-size: 16px; color: var(--ink2); max-width: 320px; line-height: 1.6; margin-bottom: 32px; }
+.ms-box { background: var(--paper2); border: 1px solid var(--rule); border-radius: 8px; padding: 24px 28px; max-width: 360px; margin-bottom: 28px; }
+.ms-box h2 { font-family: var(--serif); font-size: 22px; margin-bottom: 8px; }
+.ms-box p { font-size: 14px; color: var(--ink2); line-height: 1.6; margin-bottom: 0; }
+.ms-continue { font-family: var(--mono); font-size: 11px; color: var(--ink4); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 4px; }
+.ms-continue:hover { color: var(--ink2); }
+
+/* TOOLTIPS */
+.tip{position:relative;cursor:help;border-bottom:1px dashed var(--rule2)}
+.tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:11px;line-height:1.45;padding:7px 10px;border-radius:4px;white-space:nowrap;max-width:280px;white-space:normal;z-index:1000;opacity:0;pointer-events:none;transition:opacity .15s;min-width:180px}
+.tip:hover::after{opacity:1}
+
+/* FAMILY EXPLORER DRAWER */
+.fam-drawer{position:fixed;top:0;right:0;width:420px;height:100vh;background:var(--paper);border-left:1px solid var(--rule);z-index:200;transform:translateX(100%);transition:transform .28s cubic-bezier(.16,1,.3,1);overflow-y:auto;padding:28px 26px 40px}
+.fam-drawer.open{transform:translateX(0)}
+.fam-drawer-close{position:absolute;top:14px;right:16px;background:none;border:1px solid var(--rule2);border-radius:3px;font-family:var(--mono);font-size:9px;color:var(--ink3);cursor:pointer;padding:3px 8px}
+.fam-drawer-close:hover{color:var(--ink);border-color:var(--ink)}
+
+/* Occupation Health Card */
+.health-card{display:flex;flex-direction:column;gap:13px;padding-bottom:32px}
+.hc-section{border:1px solid var(--rule2);border-radius:6px;background:var(--paper);padding:15px 16px;margin-bottom:10px}
+.hc-section.primary{border-color:var(--rule2);box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.hc-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--rule)}
+.hc-title{font-family:var(--serif);font-size:17px;color:var(--ink);font-weight:600}
+.hc-kicker{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4)}
+.hc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.hc-stat{background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:9px}
+.hc-stat .k{font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink2);margin-bottom:5px;font-weight:600;letter-spacing:.05em}
+.hc-stat .v{font-family:var(--serif);font-size:24px;color:var(--ink);font-weight:600;line-height:1}
+.hc-stat .n{font-size:10px;color:var(--ink2);line-height:1.4;margin-top:3px}
+.hc-bar{height:8px;border-radius:99px;background:var(--rule);overflow:hidden;margin-top:6px}.hc-bar>i{display:block;height:100%;border-radius:99px}
+.hc-table{width:100%;border-collapse:collapse;font-size:9px}.hc-table th{text-align:left;font-family:var(--mono);font-size:7.5px;text-transform:uppercase;color:var(--ink4);padding:5px;border-bottom:1px solid var(--rule)}.hc-table td{padding:6px 5px;border-bottom:1px solid var(--rule);vertical-align:top}
+.metric-tip{position:relative;border-bottom:1px dotted var(--ink4);cursor:help}.metric-tip:hover .metric-pop,.metric-tip:focus .metric-pop{display:block}.metric-pop{display:none;position:absolute;z-index:500;left:0;top:calc(100% + 6px);width:290px;padding:10px;background:var(--ink);color:var(--paper);border-radius:5px;box-shadow:0 8px 24px rgba(0,0,0,.25);font:10px/1.45 var(--sans);text-transform:none;letter-spacing:0}.metric-pop strong{display:block;font-family:var(--serif);font-size:13px;margin-bottom:5px}.metric-pop code{font:9px/1.4 var(--mono);white-space:normal;color:#fff}.metric-pop .meta{margin-top:6px;color:#ddd;font-size:8.5px}
+.changelog-entry{border-left:2px solid var(--acc);padding:0 0 20px 18px;position:relative}.changelog-entry:before{content:'';position:absolute;left:-5px;top:3px;width:8px;height:8px;border-radius:50%;background:var(--acc)}.change-chip{display:inline-block;margin:3px 4px 3px 0;padding:3px 6px;border:1px solid var(--rule2);border-radius:99px;font:8px var(--mono);background:var(--paper2)}
+@media(max-width:760px){.hc-grid{grid-template-columns:1fr}.metric-pop{width:240px;left:auto;right:0}}
+
+
+/* ── GUIDED TOUR ── */
+.tour-overlay{position:fixed;inset:0;z-index:900;pointer-events:none}
+.tour-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:901;pointer-events:all}
+.tour-card{position:fixed;z-index:902;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:22px 24px 18px;width:320px;max-width:calc(100vw - 32px);max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18);pointer-events:all;transition:top .25s,left .25s,right .25s,bottom .25s}
+.tour-card h3{font-family:var(--serif);font-size:18px;margin:0 0 8px}
+.tour-card p{font-size:12px;color:var(--ink2);line-height:1.65;margin:0 0 14px}
+.tour-card .tour-step{font:9px var(--mono);color:var(--ink4);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em}
+.tour-btns{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.tour-next{padding:8px 18px;background:var(--ink);border:none;border-radius:4px;color:var(--paper);font:500 11px var(--mono);cursor:pointer;letter-spacing:.06em}
+.tour-next:hover{opacity:.85}
+.tour-skip{background:none;border:none;font:10px var(--mono);color:var(--ink4);cursor:pointer;padding:4px}
+.tour-skip:hover{color:var(--ink2)}
+.tour-highlight{outline:3px solid var(--acc)!important;outline-offset:3px;border-radius:4px;position:relative;z-index:903}
+.tour-pip{display:flex;gap:5px;align-items:center}
+.tour-pip span{width:6px;height:6px;border-radius:50%;background:var(--rule2)}
+.tour-pip span.active{background:var(--acc)}
+</style>
+</head>
+<body>
+<div class="mobile-splash" id="mobileSplash">
+  <div class="ms-logo">V<em>A</em>LENCE</div>
+  <div class="ms-tagline">A scientific classification system for AI political economy.</div>
+  <div class="ms-box">
+    <h2>Best on a large screen</h2>
+    <p>VALENCE is an interactive periodic table with 48 occupational elements, detailed evidence panels, policy simulations, and reaction network views. For the full experience, open this on a laptop or desktop.</p>
+  </div>
+  <div style="font-size:13px;color:var(--ink3);margin-bottom:16px">Data through July 2026 &nbsp;·&nbsp; Model snapshot 2026.07</div>
+  <button class="ms-continue" onclick="document.getElementById('mobileSplash').style.display='none';document.querySelector('.app').style.display='flex'">Continue on mobile anyway →</button>
+</div>
+
+<!-- GUIDED TOUR -->
+<div id="tourOverlay" style="display:none">
+  <div class="tour-backdrop" onclick="tourSkip()"></div>
+  <div class="tour-card" id="tourCard">
+    <div class="tour-step" id="tourStep"></div>
+    <h3 id="tourTitle"></h3>
+    <p id="tourBody"></p>
+    <div class="tour-btns">
+      <div class="tour-pip" id="tourPips"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="tour-skip" onclick="tourSkip()">Skip tour</button>
+        <button class="tour-next" id="tourNextBtn" onclick="tourNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="app">
+
+<div class="nav">
+  <div class="logo">V<em>A</em>LENCE</div>
+  <div class="nav-tabs">
+    <button class="nt act" onclick="showPage('table',this)">Classification Table</button>
+    <button class="nt" onclick="showPage('cascades',this)">Reaction Networks</button>
+    <button class="nt" onclick="showPage('compare',this)">Compare</button>
+    <button class="nt" onclick="showPage('validation',this)">Predictions &amp; Validation</button>
+    <button class="nt" onclick="showPage('robustness',this)">Robustness</button>
+    <button class="nt" onclick="showPage('changelog',this)">Model Changelog</button>
+    <button class="nt" onclick="showPage('methodology',this)">Methodology</button>
+  </div>
+  <div class="nav-right"><button onclick="tourStart()" style="background:none;border:1px solid var(--rule2);border-radius:3px;font:9px var(--mono);color:var(--ink3);padding:4px 10px;cursor:pointer;margin-right:8px" title="Replay guided tour">? Tour</button>
+    <div class="srch">
+      <input id="srch" type="text" placeholder="Search occupation…"/>
+      <button onclick="doSearch()">LOCATE →</button>
+    </div>
+  </div>
+</div>
+
+<div class="sug" id="sug">
+  <span id="sugTxt" style="white-space:nowrap;flex-shrink:0"></span>
+  <div id="sugChips" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+</div>
+
+<!-- TABLE PAGE -->
+<div class="page act" id="page-table">
+<div style="padding:11px 28px;background:color-mix(in srgb,var(--acc) 8%,var(--paper2));border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink);line-height:1.55;flex-shrink:0;font-weight:500">
+  <strong style="color:var(--ink)">VALENCE</strong> helps policymakers, researchers, and AI developers anticipate how frontier AI reshapes occupations, institutions, and economic power — before disruption occurs. Each element's position is entirely derived from observable structure. Predictions are falsifiable. <span style="color:var(--ink3)">Data through July 2026 · Model snapshot 2026.07</span>
+</div>  <div class="legend">
+    <div class="li"><div class="lg"></div><span>PVCI top border →</span></div>
+    <div class="li"><div class="ls" style="background:var(--f1)"></div>Rapid substituters</div>
+    <div class="li"><div class="ls" style="background:var(--f2)"></div>Workflow decomposers</div>
+    <div class="li"><div class="ls" style="background:var(--f3)"></div>Transition occupations</div>
+    <div class="li"><div class="ls" style="background:var(--f11)"></div>Institutional bottlenecks</div>
+    <div class="li"><div class="ls" style="background:var(--f12)"></div>Care and trust</div>
+    <div class="li"><div class="ls" style="background:var(--f13)"></div>Platform capture</div>
+    <div class="li"><div class="ls" style="background:var(--f14)"></div>Institutionally protected</div>
+    <div class="li"><div class="ls" style="background:var(--flan)"></div>Hidden infrastructure</div>
+    <div class="li"><div class="ls" style="background:var(--fact)"></div>Critical systems</div>
+    <div style="margin-left:auto;font-size:11px;color:var(--ink3)">
+      <span style="color:var(--grn)">● OBS</span> = AEI observed · <span style="color:var(--ink4)">≈ PRIOR</span> = prior only · TRS & PVCI on each card
+    </div>
+  </div>
+  <div class="table-main">
+    <div class="tpane" id="tpane"></div>
+    <div class="panel" id="panel"><div class="pi" id="pi"></div></div>
+  </div>
+  <div class="fam-drawer" id="famDrawer"><div id="famContent" style="padding:28px 24px 40px"></div></div>
+</div>
+
+
+<!-- COMPARE PAGE -->
+<div class="page" id="page-compare">
+  <div style="flex:1;overflow-y:auto;padding:36px 52px">
+    <div style="font-family:var(--serif);font-size:22px;margin-bottom:5px">Compare Occupations</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:20px;font-style:italic">Select up to 4 occupations to compare side-by-side across all structural dimensions.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px" id="compareSearch">
+      <input id="cmpInput" type="text" placeholder="Add occupation…" style="padding:8px 12px;background:var(--paper2);border:1px solid var(--rule2);border-radius:4px;font-size:13px;color:var(--ink);outline:none;width:220px" oninput="cmpSuggest(this.value)"/>
+      <div id="cmpSugg" style="display:none;position:absolute;z-index:100;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:4px 0;min-width:220px;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
+      <button onclick="clearCompare()" style="padding:8px 14px;background:none;border:1px solid var(--rule2);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--ink3);cursor:pointer">Clear all</button>
+    </div>
+    <div id="compareGrid" style="display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"></div>
+  </div>
+</div>
+
+<!-- METHODOLOGY PAGE -->
+<div class="page" id="page-methodology">
+  <div style="flex:1;overflow-y:auto;padding:36px 52px">
+    <div style="font-family:var(--serif);font-size:32px;font-weight:600;margin-bottom:6px">Methodology</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:28px;font-style:italic">Every score is traceable to a data source, formula, and assumption. This page documents them all.</div>
+    <div id="methodContent"></div>
+    <div style="margin-top:24px">
+      <button onclick="downloadMethodology()" style="padding:10px 18px;background:var(--ink);border:none;border-radius:4px;color:var(--paper);font-family:var(--mono);font-size:11px;cursor:pointer;letter-spacing:.06em">↓ Download model card (JSON)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROBUSTNESS PAGE -->
+<div class="page" id="page-robustness">
+  <div style="flex:1;overflow-y:auto;padding:36px 52px">
+    <div style="font-family:var(--serif);font-size:28px;margin-bottom:5px">Robustness & Data Quality</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:24px;font-style:italic">Sensitivity analysis, confidence scoring, retrospective backtesting, and parameter transparency. These address the primary concerns empirical reviewers are likely to raise.</div>
+    <div id="robustnessContent"></div>
+  </div>
+</div>
+<!-- CASCADES PAGE -->
+<div class="page" id="page-cascades">
+  <div style="flex:1;overflow-y:auto;padding:36px 52px">
+    <div style="font-family:var(--serif);font-size:22px;margin-bottom:5px">Reaction Networks</div>
+    <div style="font-size:11px;color:var(--ink3);margin-bottom:24px;font-style:italic;max-width:600px;line-height:1.5">Automation in one occupation creates cascades — it reduces demand for upstream roles, accelerates displacement in structurally similar occupations, and sometimes increases demand for complementary roles. These are the reaction pathways of AI political economy.</div>
+    <div id="cascadeContent"></div>
+  </div>
+</div>
+
+<!-- VALIDATION PAGE -->
+<div class="page" id="page-validation">
+  <div class="vpage">
+    <div class="vh">Predictions &amp; Validation</div>
+    <div class="vs">VALENCE is a scientific classification system, not a visualization. It stores falsifiable predictions against future data releases. A framework that quietly rewrites history is not a forecasting system — this page is the accountability mechanism.</div>
+    <div class="sec" style="margin-top:0">Registered predictions — model snapshot 2026.07</div>
+    <div class="pred-grid" id="predGrid"></div>
+    <div class="sec">Backtest — family coherence against AEI May 2026</div>
+    <table class="bt"><thead><tr><th>Family</th><th>Prediction</th><th>Observation</th><th>Status</th></tr></thead>
+    <tbody id="btBody"></tbody></table>
+    <div class="sec">Model card</div>
+    <div class="mc" id="mcCard"></div>
+    <div class="sec">Catalysts — events that change the model</div>
+    <div id="catalystLog"></div>
+  </div>
+</div>
+
+
+<!-- CHANGELOG PAGE -->
+<div class="page" id="page-changelog">
+  <div style="flex:1;overflow-y:auto;padding:28px 36px;max-width:900px">
+    <div style="font-family:var(--serif);font-size:28px;margin-bottom:5px">Model Changelog</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:24px;font-style:italic">A versioned record of material model changes. Entries are generated by the pipeline, not authored in the browser.</div>
+    <div id="changelogContent"><div class="note">Loading changelog…</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>VALENCE · Scientific Classification System for AI Political Economy · CC-BY</span>
+  <span>Data through July 2026 · Model snapshot: 2026.07 · Last recalculated: July 2026</span>
+  <span>O*NET 29.3 · BLS OEWS May 2024 · BLS CPS Table 42 2025 · AEI May 2026 · MIT Project Iceberg 2025 · Ramp AI Index Jun 2026</span>
+</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   VALENCE — Scientific Classification System for AI Political Economy
+   Position is entirely derived from observable structure.
+   Chemistry framework explains — not just illustrates — AI-driven economic change.
+═══════════════════════════════════════════════════════════ */
+
+/* ── PLACEMENT ALGORITHM (fully emergent, no overrides) ────────
+   Documented here so any new occupation can be placed automatically.
+
+   PERIOD = f(shell_score):
+     shell_score = 0.30×lic + 0.20×phys + 0.20×union + 0.20×sov + 0.10×cred
+     period 1: shell ≥ 0.90  (max protection)
+     period 2: shell 0.70–0.90
+     period 3: shell 0.55–0.70
+     period 4: shell 0.40–0.55
+     period 5: shell 0.25–0.40
+     period 6: shell 0.12–0.25
+     period 7: shell < 0.12
+
+   COLUMN = f(capture_pull, lic, sov, phys, social_perc, cm):
+     Gate 1 — Noble gas (col 14):  lic≥1.0 AND sov≥0.65
+     Gate 2 — Care/trust (col 12): lic≥0.5 AND phys≥0.85 AND sov<0.5
+     Gate 3 — Bottleneck (col 11): lic≥0.5 AND 0.25≤sov<0.65
+     Gate 4 — Halogen (col 13):   capture_pull≥0.35 AND lic<0.5 AND sov<0.2
+     Gate 5 — Network former (10): cm≥0.47 AND (1-rc)≥0.40 AND lic<0.1 AND shell<0.25
+     Gate 6 — Boundary (col 9):   shell≥0.20 OR (lic≥0.5 AND sov<0.25)
+     Gate 7 — Rapid sub (col 1):  reactivity≥0.38
+     Gate 8 — Workflow dec (col 2): default
+
+   Within-column period assignment: rank by shell_score DESC within family,
+   assign to consecutive available periods.
+
+   CONFIDENCE:
+     H (high): AEI observed + multiple O*NET data points
+     M (medium): O*NET only or AEI with high occupational variance
+     L (low): prior only, single data point, or high within-occupation variance
+─────────────────────────────────────────────────────────── */
+
+const FAM={
+  'Noble gas':            {dfam:'18',color:'var(--f14)',conf_note:'Noble gas status is high-confidence when licensing AND sovereign are both ≥0.65. Both are binary institutional facts.'},
+  'Halogen':              {dfam:'17',color:'var(--f13)',conf_note:'Halogen placement depends on capture_pull threshold (0.35). Confidence is medium when sw_ratio and digitizability are borderline.'},
+  'Care / trust':         {dfam:'16',color:'var(--f12)',conf_note:'Care/trust placement depends on physical presence ≥0.85 AND licensing. High confidence when both are clearly met.'},
+  'Bottleneck custodian': {dfam:'15',color:'var(--f11)',conf_note:'Bottleneck placement depends on licensing + moderate sovereign (0.25–0.65). Medium confidence when sovereign is borderline.'},
+  'Network former':       {dfam:'14',color:'var(--f10)',conf_note:'Network former is a sparse family — only occupations with high cm + low routine + low licensing qualify.'},
+  'Boundary / metalloid': {dfam:'9', color:'var(--f3)', conf_note:'Staircase zone. High variance — these occupations could plausibly be in adjacent families. Medium confidence by design.'},
+  'Transition':           {dfam:'3-8',color:'var(--f3)',conf_note:'Transition block. Multiple stable equilibria — outcome depends on institutional context.'},
+  'Workflow decomposer':  {dfam:'2', color:'var(--f2)',conf_note:'Workflow decomposer placement is high confidence when shell is clearly low and reactivity is moderate.'},
+  'Rapid substituter':    {dfam:'1', color:'var(--f1)',conf_note:'Rapid substituter placement is high confidence when reactivity×(1-shell) is clearly elevated.'},
+  'Lanthanide':           {dfam:'Ln',color:'var(--flan)',conf_note:'Hidden enabling infrastructure — rarely discussed in AI displacement discourse. Prior estimates only.'},
+  'Actinide':             {dfam:'Ac',color:'var(--fact)',conf_note:'Low-frequency, high-consequence systems. Sovereign + liability + physical all near maximum. Displacement risk is low but consequence is extreme.'},
+};
+
+/* ── REACTION NETWORK (cascade data) ── */
+const CASCADES=[
+  {from:'Bk',to:'Ac',strength:'Strong',type:'demand-reduction',desc:'As bookkeeper tasks automate (QuickBooks/Xero), demand for accountants who supervised them falls. Mid-tier accounting roles are directly cascade-exposed.'},
+  {from:'De',to:'Ad',strength:'Strong',type:'demand-reduction',desc:'Data entry automation reduces the volume of clerical work that admin assistants coordinate. Cascade already underway in large enterprises.'},
+  {from:'Cs',to:'Tl',strength:'Strong',type:'demand-reduction',desc:'Customer service AI automation reduces demand for telemarketing, which relied on the same human-phone-channel infrastructure.'},
+  {from:'Sd',to:'Pr',strength:'Moderate',type:'demand-reduction',desc:'AI coding tools increase software developer productivity, reducing demand for junior programmers — who would have become paralegal-equivalent "legal coders" in some workflows.'},
+  {from:'An',to:'Rs',strength:'Moderate',type:'demand-reduction',desc:'BI platform AI (Tableau AI, Power BI Copilot) automates data analyst tasks, reducing demand for the research roles that fed analysts with structured findings.'},
+  {from:'Ra',to:'Nr',strength:'Moderate',type:'demand-reduction',desc:'AI diagnostic imaging reduces radiologist workload, which in turn reduces demand for radiology nurses and imaging technicians who support the workflow.'},
+  {from:'Tf',to:'Wa',strength:'Strong',type:'co-displacement',desc:'Autonomous vehicle deployment co-displaces truck drivers and warehouse workers — both are nodes in the logistics automation cascade. Amazon robotics accelerates both simultaneously.'},
+  {from:'La',to:'Pr',strength:'Strong',type:'demand-reduction',desc:'AI legal research tools directly substitute for paralegal document review. The paralegal role exists largely because lawyers needed human reviewers — AI removes that need.'},
+  {from:'Ac',to:'Bk',strength:'Strong',type:'demand-reduction',desc:'Accountants increasingly use AI tools that absorb bookkeeping sub-tasks, reducing demand for bookkeepers whose output accountants previously incorporated.'},
+  {from:'Mg',to:'Ad',strength:'Moderate',type:'demand-reduction',desc:'Manager AI tools (Copilot, Salesforce AI) reduce demand for administrative assistants by automating scheduling, document creation, and coordination.'},
+  {from:'Sd',to:'An',strength:'Moderate',type:'complementary',desc:'Software developer AI augmentation increases demand for data analysts who interpret the outputs — a complementary cascade rather than demand-reduction.'},
+  {from:'Nrs',to:'Nr',strength:'Moderate',type:'complementary',desc:'RN AI augmentation tools create new demand for LPN supervision tasks as care delivery reorganizes around AI-augmented clinical workflows.'},
+];
+
+/* ── ISOTOPES ── */
+const ISOTOPES={
+  '15-1252':[
+    {label:'Startup (VC-backed, no union)',dr_d:-0.15,trs_d:+0.05,pvci_d:+0.08,note:'Lower DR — no job security. Higher platform capture via cloud/API vendor dependency.'},
+    {label:'Regulated bank (compliance-heavy)',dr_d:+0.12,trs_d:-0.04,pvci_d:-0.06,note:'Regulatory overhead raises DR. Compliance slows AI adoption. Lower vendor capture.'},
+    {label:'Government / public sector',dr_d:+0.20,trs_d:-0.08,pvci_d:-0.10,note:'Civil service + procurement rules maximize DR. Capture routes to public infrastructure.'},
+    {label:'Open-source / cooperative',dr_d:+0.05,trs_d:+0.02,pvci_d:-0.12,note:'Output is publicly owned — platform capture structurally reduced.'},
+  ],
+  '29-1141':[
+    {label:'Large hospital system (Epic/EHR)',dr_d:+0.05,trs_d:0,pvci_d:+0.06,note:'Higher platform capture via EHR infrastructure.'},
+    {label:'Rural / critical access hospital',dr_d:+0.08,trs_d:-0.03,pvci_d:-0.04,note:'Lower AI deployment rate. Physical necessity increases effective DR.'},
+    {label:'Traveling nurse (contract agency)',dr_d:-0.18,trs_d:+0.03,pvci_d:+0.05,note:'No employer-specific DR. Highest capture through staffing intermediaries.'},
+  ],
+  '23-1011':[
+    {label:'Biglaw / large firm',dr_d:+0.08,trs_d:+0.05,pvci_d:+0.08,note:'High LexisNexis/platform dependency. Higher AI document review exposure.'},
+    {label:'Solo / small practice',dr_d:-0.05,trs_d:-0.02,pvci_d:-0.04,note:'Client relationship more portable. Less platform lock-in.'},
+    {label:'Public defender / legal aid',dr_d:+0.15,trs_d:-0.05,pvci_d:-0.08,note:'Constitutional function maximizes sovereign shell. Output is public, not platform-captured.'},
+  ],
+};
+
+/* ── HALF-LIVES ── */
+const HALF_LIFE={
+  '43-9021':{y:2.1,note:'ASR models already at parity. Already elapsed for most deployment contexts.'},
+  '41-9041':{y:2.8,note:'Voice AI deployed at scale. Rapid task redistribution underway.'},
+  '43-3031':{y:3.5,note:'QuickBooks/Xero automation penetrating routine bookkeeping.'},
+  '43-6014':{y:4.2,note:'Microsoft 365 Copilot is the direct automation vector.'},
+  '15-2051':{y:3.8,note:'BI platform AI (Tableau AI, Power BI Copilot) accelerating.'},
+  '15-1252':{y:5.5,note:'AI coding tools augment more than substitute. High TSC extends half-life.'},
+  '29-1141':{y:12.0,note:'Physical care + licensing + union = long half-life.'},
+  '23-1023':{y:null,note:'No credible displacement mechanism within 10-year forecast horizon.'},
+};
+
+/* ── CATALYSTS ── */
+const CATALYSTS=[
+  // ── 1. CAPABILITY ────────────────────────────────────────────
+  {category:'Capability',name:'Long-horizon reasoning agents',date:'Expected 2027–2029',
+   families:['Transition','Network former','Boundary / metalloid'],status:'forecast',
+   effect:'Enables managerial delegation, multi-week planning, and scientific research workflows. Shifts manager and researcher oxidation states. The key question is not capability but which institutions permit agentic delegation.'},
+  {category:'Capability',name:'Autonomous scientific discovery',date:'Expected 2028–2032',
+   families:['Researcher','Boundary / metalloid'],status:'forecast',
+   effect:'Research occupations (Rs) move toward higher TRS as AI handles hypothesis generation and experiment design in drug discovery and materials science. New complementary occupations emerge around oversight and validation.'},
+  {category:'Capability',name:'General-purpose robotics below human labor cost',date:'Expected 2028–2035',
+   families:['Transition','Boundary / metalloid'],status:'forecast',
+   effect:'Probably the single largest catalyst in the model. Affects warehousing (Wa), manufacturing (Mw), construction, and agriculture. Physical presence shells stop providing protection when robots undercut human cost. Triggers massive cascade.'},
+  {category:'Capability',name:'Foundation models with persistent organizational memory',date:'Expected 2027–2030',
+   families:['Rapid substituter','Network former','Bottleneck custodian'],status:'forecast',
+   effect:'Models begin functioning as long-term institutional agents rather than session-based assistants. Directly affects administrative work (Ad), knowledge management, and internal operations. Changes the nature of the manager-AI interface.'},
+  // ── 2. DEPLOYMENT ─────────────────────────────────────────────
+  {category:'Deployment',name:'AI reaches Fortune 500 default workflow',date:'Expected 2027–2029',
+   families:['Bottleneck custodian','Network former','Transition'],status:'forecast',
+   effect:'Large organizations begin defaulting to AI-first workflows. Directly affects accountants (Ac), analysts (An), HR, and project management. Deployment spreads faster than capability — the bottleneck becomes procurement and change management, not technical performance.'},
+  {category:'Deployment',name:'Majority of software development becomes AI-assisted',date:'Expected 2027+',
+   families:['Halogen'],status:'emerging',
+   effect:'Software engineering oxidation state changes from 0 to +1/+2. Developer occupations reorganize around AI orchestration, code review, and systems design rather than routine code generation. Augmentation-dominant, not substitution-dominant.'},
+  {category:'Deployment',name:'Autonomous customer support exceeds human volume',date:'Expected 2027–2028',
+   families:['Rapid substituter','Halogen'],status:'forecast',
+   effect:'Customer service (Cs), sales (Sa), and technical support cross a deployment threshold where AI handles more volume than humans. Half-lives for Cs and Tl shorten significantly. Triggers demand-reduction cascade into related roles.'},
+  {category:'Deployment',name:'AI-native companies outperform traditional firms',date:'Expected 2028+',
+   families:['Network former','Transition','Bottleneck custodian'],status:'forecast',
+   effect:'Causes rapid organizational restructuring as lagging firms accelerate adoption to stay competitive. Acts as a deployment multiplier across all non-protected occupations — changes the adoption speed assumption in the forecast model.'},
+  // ── 3. POLICY ──────────────────────────────────────────────────
+  {category:'Policy',name:'AI liability framework',date:'Expected 2027–2030',
+   families:['Noble gas','Bottleneck custodian','Boundary / metalloid'],status:'forecast',
+   effect:'Professional liability rules updated to assign accountability for AI-assisted decisions. Raises protective shells for licensed occupations (surgeons, lawyers, financial advisors). Slows adoption in high-liability domains even where capability exists.'},
+  {category:'Policy',name:'Professional licensing reform',date:'Policy scenario',
+   families:['Noble gas','Bottleneck custodian'],status:'scenario',
+   effect:'◇ SCENARIO: Doctors, lawyers, engineers, and accountants see licensing structures adapt to AI-assisted practice. Could reduce licensing as a protective shell — or formalize it further. Direction depends on professional association response and jurisdiction.'},
+  {category:'Policy',name:'Universal AI disclosure requirements',date:'Policy scenario',
+   families:['Halogen','Care / trust'],status:'scenario',
+   effect:'◇ SCENARIO: Every AI-generated work product requires disclosure. Changes platform value capture dynamics and raises the value of trust occupations, media, and human-verified content. Affects PVCI for halogen occupations.'},
+  {category:'Policy',name:'Interoperability mandates',date:'Policy scenario',
+   families:['Halogen','Bottleneck custodian'],status:'scenario',
+   effect:'◇ SCENARIO: Reduces PVCI for halogen occupations by 8–15pp. Switching cost component falls. Worker capture share increases. This one changes who captures the gains without changing AI capability at all.'},
+  {category:'Policy',name:'AI taxation / automation taxes',date:'Highly uncertain',
+   families:['Rapid substituter','Workflow decomposer','Transition'],status:'scenario',
+   effect:'◇ SCENARIO: Very uncertain. Could reduce deployment speed substantially if enacted at scale. Would be the most significant policy lever in the model — more impactful than liability reform because it changes the economic incentive, not just the legal risk.'},
+  {category:'Policy',name:'Government procurement mandates',date:'Policy scenario',
+   families:['Transition','Boundary / metalloid'],status:'scenario',
+   effect:'◇ SCENARIO: Governments begin requiring AI in certain workflows. Interesting because it accelerates adoption without any capability improvements. Changes deployment speed assumption for public-sector occupations and contractors.'},
+  // ── 4. ECONOMIC ──────────────────────────────────────────────
+  {category:'Economic',name:'AI labor cost falls below offshore labor',date:'Expected 2027+',
+   families:['Rapid substituter','Halogen'],status:'forecast',
+   effect:'Massive catalyst. Affects customer service (Cs), data labeling, back-office work, and translation. Once AI inference cost falls below offshore human labor, substitution pressure becomes purely economic rather than technical. Dramatically shortens half-lives.'},
+  {category:'Economic',name:'AI inference cost drops 100×',date:'Expected 2027–2030',
+   families:['Halogen','Transition','Boundary / metalloid'],status:'forecast',
+   effect:'Expands deployment everywhere — changes PVCI, deployment speed, and occupational adoption rates across all families. Makes "compute abundance" the baseline assumption rather than a scenario.'},
+  {category:'Economic',name:'Compute abundance: inference becomes effectively free',date:'Expected 2029–2033',
+   families:['Halogen','Rapid substituter','Network former'],status:'forecast',
+   effect:'Changes PVCI fundamentally — when inference is free, the bottleneck becomes data, relationships, and institutional access rather than compute. Raises platform capture for whoever controls those bottlenecks.'},
+  {category:'Economic',name:'Agent marketplace maturity',date:'Expected 2028–2032',
+   families:['Network former','Transition'],status:'forecast',
+   effect:'Organizations begin purchasing specialized AI workers rather than models. Interesting structural shift — changes what "hiring" means and which occupations compete with AI agents directly versus managing them.'},
+  // ── 5. SOCIAL ────────────────────────────────────────────────
+  {category:'Social',name:'AI trust exceeds human trust in selected domains',date:'Expected 2026–2030',
+   families:['Noble gas','Halogen','Boundary / metalloid'],status:'emerging',
+   effect:'In radiology, translation, coding, and fraud detection, AI trust already exceeds human trust for specific task types. Changes complementarity dynamics — the human role shifts from execution to oversight and legitimacy rather than accuracy.'},
+  {category:'Social',name:'Consumer preference shifts toward AI interaction',date:'Expected 2027–2030',
+   families:['Rapid substituter','Care / trust'],status:'forecast',
+   effect:'Consumers begin preferring AI interaction in certain settings (customer service, basic advice, scheduling). Very different from capability — this is a demand-side shift. Changes the substitution curve for rapid substituters even without new capability.'},
+  {category:'Social',name:'Human-authored work becomes premium',date:'Emerging',
+   families:['Boundary / metalloid','Care / trust'],status:'emerging',
+   effect:'Creates new complementarity for artists, writers, and craftspeople. Luxury writing, artisanal goods, and human-verified services begin commanding premiums precisely because they are distinguishable from AI output. Wr (Writer/Editor) has a complementary isotope here.'},
+];
+
+/* ── PVCI COLOR ── */
+function pvciColor(v){
+  const t=Math.max(0,Math.min(1,v));
+  if(t<0.5){const s=t/0.5;return`rgb(${Math.round(26+s*96)},${Math.round(107-s*27)},${Math.round(58-s*42)})`}
+  const s=(t-0.5)/0.5;return`rgb(${Math.round(122+s*17)},${Math.round(80-s*48)},${Math.round(16+s*16)})`;
+}
+function lirColor(v){return v<.38?'var(--grn)':v<.55?'var(--amb)':v<.72?'var(--ora)':'var(--red)'}
+function lirLabel(v){return v<.38?'Low — window open':v<.55?'Moderate — narrowing':v<.72?'High — urgent':'Critical — met'}
+function empFmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':''+n}
+function oxLabel(s){return s===null?'—':String(s)}
+function oxDesc(s){return{'A':'Augmentation — human remains primary actor','T':'Transitional — AI handles bounded subtasks with mandatory human review','S':'Supervised — AI handles routine; human manages exceptions','D':'Delegated — AI-dominant; human formally supervises'}[s]||'—'}
+function famDfam(f){return(FAM[f]||{dfam:'?'}).dfam}
+function famColor(f){return(FAM[f]||{color:'var(--ink4)'}).color}
+function confOpacity(o){return o.conf==='L'?'conf-L':o.conf==='M'?'conf-M':''}
+
+/* ── BUILD TABLE ── */
+
+/* ── RAMP + ICEBERG CONSTANTS ── */
+const RAMP_SERIES=[
+  {d:'Jan 2023',r:7.46},{d:'Apr 2023',r:24.4},{d:'Jan 2024',r:32.51},
+  {d:'Jan 2025',r:37.73},{d:'Jul 2025',r:44.08},{d:'Jan 2026',r:46.96},
+  {d:'Feb 2026',r:49.10},{d:'Mar 2026',r:51.26},{d:'Apr 2026',r:52.98},
+  {d:'May 2026',r:54.17},{d:'Jun 2026',r:54.95},
+];
+const CENSUS_SERIES=[
+  {d:'Sep 2023',r:3.7},{d:'Jan 2024',r:4.97},{d:'Jan 2025',r:6.75},
+  {d:'Jul 2025',r:9.10},{d:'Jan 2026',r:18.55},{d:'Mar 2026',r:19.0},
+  {d:'Jun 2026',r:20.6},
+];
+const RAMP_CURRENT=54.95;
+const CENSUS_CURRENT=20.6;
+const ICEBERG_SURFACE=2.2;
+const ICEBERG_FULL=11.7;
+const ICEBERG_RATIO=5.3;
+
+// Runtime data contract: the browser renders fields pre-computed by pipeline.py.
+window.DATA=[]; window.MAIN=[]; window.FBLOCK=[];
+
+async function initValence(){
+  try{
+    const response=await fetch('./data.json',{cache:'no-store'});
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data=await response.json();
+    if(!Array.isArray(data)) throw new Error('data.json must contain an array');
+    window.DATA=data;
+    window.MAIN=data.filter(o=>!o.fblock);
+    window.FBLOCK=data.filter(o=>o.fblock);
+    validatePrecomputedData(data);
+    buildTable();
+    buildCascades();
+    loadChangelog();
+    const hash=location.hash.replace('#','');
+    if(hash){const o=data.find(d=>d.sym.toLowerCase()===hash.toLowerCase());if(o)showPanel(o);}
+  }catch(err){
+    console.error('Failed to load VALENCE data.json',err);
+    const table=document.getElementById('tablePage')||document.body;
+    table.insertAdjacentHTML('afterbegin',`<div style="margin:16px;padding:14px;border:1px solid #8A1818;background:#fff4f4;color:#8A1818;font:12px monospace">Unable to load data.json (${err.message}). Serve the public directory over HTTP; opening index.html via file:// is not supported.</div>`);
+  }
+}
+
+initValence();
+
+
+function buildSample(tp){
+  // Use Data Analyst (An) as the example — AEI observed, halogen, stage S
+  const ex=window.DATA.find(d=>d.sym==='An');
+  if(!ex||localStorage.getItem('valence_sample_dismissed'))return;
+  const w=document.createElement('div');w.className='sample-wrap';w.id='sampleEl';
+  w.innerHTML=`
+    <button class="sdismiss" onclick="document.getElementById('sampleEl').remove();localStorage.setItem('valence_sample_dismissed','1')">✕ dismiss</button>
+    <div>
+      <div class="sample-title">How to read an element</div>
+      <div class="sc">
+        <div class="sox">S</div>
+        <div class="scf">● OBS</div>
+        <div class="ssym">An</div>
+        <div class="snm">Data Analyst</div>
+        <div class="strs">TRS 36%</div>
+        <div class="spvc">PVCI 43%</div>
+      </div>
+    </div>
+    <div class="sann">
+      <div class="arow"><span class="akey">Symbol</span><span class="aval"><strong>An</strong> — the occupation's identifier. Click any element to open its full profile.</span></div>
+      <div class="arow"><span class="akey">Name</span><span class="aval"><strong>Data Analyst</strong> — the occupation this element represents.</span></div>
+      <div class="arow"><span class="akey">Top-left</span><span class="aval"><strong>S</strong> — AI integration stage. A = Augmentation, T = Transitional, S = Supervised, D = Delegated.</span></div>
+      <div class="arow"><span class="akey">Top-right</span><span class="aval"><strong>● OBS</strong> means this occupation has observed data from the Anthropic Economic Index. <strong>≈ PRIOR</strong> means the score is model-estimated only.</span></div>
+      <div class="arow"><span class="akey">TRS 36%</span><span class="aval"><strong>Task Replaceability Score</strong> — the probability that current AI can perform this occupation's tasks at required quality and cost.</span></div>
+      <div class="arow"><span class="akey">PVCI 43%</span><span class="aval"><strong>Platform Value Capture Index</strong> — how much of the productivity gain flows to platform or infrastructure owners rather than workers.</span></div>
+      <div class="arow"><span class="akey">Color</span><span class="aval">Background tint and left stripe = <strong>family</strong>. Gold = Platform capture (Halogen). Column = structural response type. Row = protective-shell strength.</span></div>
+      <div class="arow"><span class="akey">Bottom bar</span><span class="aval"><strong>Structural lag</strong> — the gap between what AI can technically do (Iceberg capability) and current organizational adoption. Red = large hidden mass, green = adoption has caught up.</span></div>
+    </div>
+  `;
+  tp.appendChild(w);
+}
+
+function buildTable(){
+  const tp=document.getElementById('tpane');
+  if(!window.MAIN||!window.MAIN.length){tp.innerHTML='<div style="padding:40px;color:var(--ink3);font-family:var(--mono);font-size:10px">Loading data…</div>';return}
+  buildSample(tp);
+  const NCOLS=14,NROWS=7;
+  // Pipeline uses chemistry col numbers (17=halogen, 14=noble gas).
+  // Map to display cols for the 14-col visual layout.
+  const DISPLAY_COL={17:13};  // halogen (col 17) renders at display col 13
+  const grid={};MAIN.forEach(o=>{const dc=DISPLAY_COL[o.col]||o.col;grid[`${o.period}-${dc}`]=o});
+
+  // Block header
+  const bh=document.createElement('div');bh.className='blk-hdr';bh.style.paddingLeft='94px';
+  const blocks=[{w:118,l:'s¹ · Rapid sub.'},{w:118,l:'s² · Workflow'},{w:118*6+5*3,l:'d-block · Transition · Governance · Boundary'},{w:118,l:'★ Staircase'},{w:118,l:'Col 14 · Network'},{w:118,l:'Col 15 · Bottleneck'},{w:118,l:'Col 16 · Care/trust'},{w:118,l:'Col 17 · Platform capture'},{w:118,l:'Col 18 · Noble gas'}];
+  const famKeyMap={'s¹ · Rapid sub.':'Rapid substituter','s² · Workflow':'Workflow decomposer','d-block · Transition · Governance · Boundary':'Transition','★ Staircase':null,'Col 14 · Network':'Network former','Col 15 · Bottleneck':'Bottleneck custodian','Col 16 · Care/trust':'Care / trust','Col 17 · Platform capture':'Halogen','Col 18 · Noble gas':'Noble gas'};
+  blocks.forEach(b=>{const d=document.createElement('div');d.className='bh';d.style.width=b.w+'px';d.style.flexShrink='0';d.textContent=b.l;if(b.title)d.style.color='var(--acc)';
+  const fk=famKeyMap[b.l];if(fk){d.style.cursor='pointer';d.title='Click to explore this family';d.addEventListener('click',()=>openFamDrawer(fk));}
+  bh.appendChild(d)});
+  tp.appendChild(bh);
+
+  // Rows
+  const pl=['Period 1\nMax shells','Period 2\nHigh protection','Period 3\nModerate-high','Period 4\nModerate','Period 5\nLow-moderate','Period 6\nLow protection','Period 7\nMinimal shells'];
+  for(let p=1;p<=NROWS;p++){
+    const row=document.createElement('div');row.className='pt-row';
+    const lbl=document.createElement('div');lbl.className='pl';lbl.textContent=pl[p-1];row.appendChild(lbl);
+    for(let c=1;c<=NCOLS;c++){
+      const occ=grid[`${p}-${c}`];
+      if(occ)row.appendChild(buildEl(occ));
+      else{const g=document.createElement('div');g.className='el-gap';if(c===9)g.style.cssText='width:118px;height:118px;flex-shrink:0;border-left:2px dashed var(--rule2);opacity:.4';row.appendChild(g)}
+    }
+    tp.appendChild(row);
+  }
+
+  // Staircase label
+  const sl=document.createElement('div');sl.className='stair-lbl';
+  sl.innerHTML='◀ substitution-dominant &nbsp;<span style="color:var(--acc)">── col 9 · staircase · governance zone ──</span>&nbsp; complementarity-dominant ▶';
+  tp.appendChild(sl);
+
+  // F-block
+  buildFblock(tp);
+}
+
+function buildEl(o){
+  const el=document.createElement('div');
+  el.className='el';el.dataset.sym=o.sym;
+  const df=famDfam(o.family);
+  el.dataset.f=df==='17'?'13':df==='18'?'14':df==='16'?'12':df==='15'?'11':df==='14'?'10':o.col<=2?String(o.col):'T';
+  el.style.borderTopColor=pvciColor(o.pvci);
+  /* employment size encoding removed for legibility — all cards same size */
+  // Confidence badge: ● OBS / ~ EST / ≈ PRIOR
+  const confLabel=o.has_aei?'● OBS':'≈ PRIOR';
+  const confColor=o.has_aei?'var(--grn)':'var(--ink4)';
+  el.innerHTML=`
+    ${o.oxidation_state!==null?`<div class="el-ox" style="color:${lirColor(o.lir)}">${oxLabel(o.oxidation_state)}</div>`:''}
+    <div class="el-conf" style="color:${confColor}">${confLabel}</div>
+    <div class="el-sym">${o.sym}</div>
+    <div class="el-name">${o.name}</div>
+    <div class="el-trs">TRS ${Math.round(o.trs_post*100)}%</div>
+    <div class="el-pvci">PVCI ${Math.round(o.pvci*100)}%</div>
+    ${o.structural_lag!=null?`<div class="el-lag"><div class="el-lag-fill" style="width:${Math.round(o.structural_lag*100)}%;background:${o.structural_lag>0.45?'var(--red)':o.structural_lag>0.25?'var(--amb)':'var(--grn)'}"></div></div>`:''}
+  `;
+  el.addEventListener('click',()=>showPanel(o));
+  el.title=`${o.name} · ${o.family} · TRS ${Math.round(o.trs_post*100)}% · PVCI ${Math.round(o.pvci*100)}% · ${confOpacity(o)||'high'} confidence`;
+  return el;
+}
+
+function buildFblock(tp){
+  if(!window.FBLOCK||!window.FBLOCK.length)return;
+  const fs=document.createElement('div');fs.className='fblock-section';
+  const conn=document.createElement('div');conn.className='fblock-connector';
+  conn.textContent='↳ f-block: occupations governed by a different substrate (hidden infrastructure and critical systems)';
+  fs.appendChild(conn);
+
+  const rows=document.createElement('div');rows.className='fblock-rows';rows.style.marginTop='8px';
+
+  ['Lanthanide','Actinide'].forEach((type,ri)=>{
+    const row=document.createElement('div');row.className='fblock-row';
+    const rl=document.createElement('div');rl.className='fblock-row-lbl';
+    rl.textContent=type==='Lanthanide'?'Hidden infra':'Critical systems';row.appendChild(rl);
+    FBLOCK.filter(o=>o.family===type).forEach(o=>{row.appendChild(buildEl(o))});
+    rows.appendChild(row);
+  });
+  fs.appendChild(rows);
+  tp.appendChild(fs);
+}
+
+/* ── PANEL ── */
+let activeChart=null,activeOcc=null,polMods={portability:0,profitShare:0,bargaining:0,publicCompute:0};
+
+function showPanel(o){
+  activeOcc=o;
+  const allEls=document.querySelectorAll('.el');
+  allEls.forEach(el=>{el.classList.toggle('hl',el.dataset.sym===o.sym);el.classList.toggle('dm',el.dataset.sym!==o.sym)});
+  document.getElementById('panel').classList.add('open');
+  renderPanel(o);
+}
+
+function renderPanel(o){
+  const fc=FAM[o.family]||{dfam:'?',color:'var(--ink4)',conf_note:''};
+  const pvc=pvciColor(o.pvci);
+  const hl=HALF_LIFE[o.soc];
+  const conf={score:o.confidence_score??0,tier:o.confidence_tier||'Unknown'};
+  document.getElementById('pi').innerHTML=`
+    <button class="pc" onclick="closePanel()">✕ close</button>
+    <button class="pc" style="margin-right:6px" onclick="window.location.hash='${o.sym}';navigator.clipboard&&navigator.clipboard.writeText(window.location.href)">⎘ share</button>
+    <div class="p-sym" style="color:${pvc}">${o.sym}</div>
+    <div class="p-title">${o.name}</div>
+    <div class="p-meta">SOC ${o.soc} · ${empFmt(o.emp)} workers · Evidence coverage: ${conf.tier} (${Math.min(95,Math.round(conf.score*100))}%)</div>
+    ${hl?`<div style="margin:5px 0 9px;font-family:var(--mono);font-size:8.5px;color:var(--ink3)">Half-life: <strong>${hl.y?hl.y+'yr':'—'}</strong> · ${hl.note}</div>`:''}
+    ${healthCard(o,fc)}
+  `;
+  renderChart(o);
+}
+
+const METRIC_DICTIONARY={
+ TRS:{name:'Transformation (TRS)',definition:'Forecast probability or degree of significant occupational structural transformation over the chosen 10-year horizon. TRS measures occupational transformation — not job loss. Employment impacts are modelled separately as scenario analyses.',formula:'Evidence-weighted update: 0.6 × structural prior (O*NET) + 0.4 × AEI capability signal',sources:'O*NET 29.3; Anthropic Economic Index May 2026',frequency:'On each source release'},
+ PVCI:{name:'Platform Value Capture Index',definition:'Constructed index estimating the share of AI-enabled productivity value likely to flow to platform and infrastructure owners rather than workers.',formula:'Weighted sum of digitizability, software-platform dependence, computer mediation, switching cost, portability, and concentration',sources:'O*NET; model priors; future firm concentration data',frequency:'Annual or parameter release'},
+ DR:{name:'Displacement Resistance',definition:'Institutional, physical, and legal friction preventing human removal after capability is reached.',formula:'0.30 licensing + 0.20 physical + 0.20 union + 0.20 sovereign + 0.10 credential',sources:'O*NET; BLS CPS; licensing and institutional priors',frequency:'Annual'},
+ TSC:{name:'Transferable Skill Count',definition:'Estimated breadth of adjacent skills that support lateral movement after occupational transformation.',formula:'Derived from computer mediation, analytical activities, and O*NET adjacency',sources:'O*NET',frequency:'O*NET release'},
+ LIR:{name:'Lock-in Risk',definition:'Composite risk that AI value concentration becomes self-reinforcing at occupational scale.',formula:'0.30 TRS + 0.30 PVCI + 0.25 (1−DR) + 0.15 employment scale',sources:'VALENCE derived metrics; BLS employment',frequency:'Every pipeline run'},
+ ICEBERG:{name:'Capability (technical)',definition:'Estimated share of this occupation\'s skills that frontier AI systems can technically perform — regardless of whether organisations have deployed it. This is the \'what AI can do\' layer, independent of adoption.',formula:'VALENCE estimate using MIT Project Iceberg methodology (Chopra et al., 2025)',sources:'MIT Project Iceberg 2025; O*NET skill taxonomy',frequency:'On capability-data release'},
+ SURFACE:{name:'Adoption (occupation-specific)',definition:'Share of this occupation\'s workflows currently using AI — distinct from economy-wide enterprise adoption (54.95% of Ramp-tracked businesses). Occupation-specific adoption is measured via AEI observed exposure for this SOC code.',formula:'AEI observed automation share × occupational specificity factor',sources:'Anthropic Economic Index May 2026; occupation-specific O*NET exposure',frequency:'On AEI release'},
+ LAG:{name:'Capability–Adoption Lag',definition:'Capability − Occupation Adoption. The magnitude of latent transformation pressure: what AI can technically do minus what is currently deployed in this occupation. A large lag indicates potential disruption is technically ready but blocked by institutional, organisational, or physical barriers.',formula:'Capability (Iceberg) − Occupation Adoption (AEI surface score)',sources:'Derived from Iceberg and AEI layers',frequency:'Every pipeline run'}
+};
+function metricLabel(key,label,tier=''){const m=METRIC_DICTIONARY[key];return `<span class="metric-tip" tabindex="0">${label||key}<span class="metric-pop"><strong>${m.name}</strong>${m.definition}<br><br><code>${m.formula}</code><div class="meta">Sources: ${m.sources}<br>Update frequency: ${m.frequency}<br>Current evidence tier: ${tier||'See occupation evidence record'}</div></span></span>`}
+function hcSection(title,kicker,body,primary=false){return `<section class="hc-section${primary?' primary':''}"><div class="hc-head"><div class="hc-title">${title}</div><div class="hc-kicker">${kicker}</div></div>${body}</section>`}
+function occupationSummary(o,trans,ciLo,ciHi,lag){
+  // One-paragraph narrative summary for Scene 1
+  const trsLabel = trans>=70?'highly likely':trans>=50?'likely':trans>=30?'moderately likely':'unlikely';
+  const lagNote = lag>40?`Technical capability substantially exceeds current deployment (${lag}pp structural lag), suggesting disruption pressure is building.`:lag>20?`A moderate gap between capability and adoption (${lag}pp) indicates unrealised disruption potential.`:`Capability and adoption are broadly aligned (${lag}pp gap).`;
+  const stageNote = o.oxidation_state==='D'?'AI is already dominant in this role.':o.oxidation_state==='S'?'AI currently handles routine tasks under human supervision.':o.oxidation_state==='T'?'The occupation is in a transitional state with mixed human–AI configurations.':'AI is primarily augmenting human work in this occupation.';
+  return `${stageNote} ${lagNote} Based on ${o.has_aei?'observed AEI data and':'structural O*NET features and'} MIT Iceberg capability scores, the forecast transformation probability is <strong>${trans}%</strong> (${ciLo}–${ciHi}% uncertainty band). ${o.family==='Noble gas'?'High institutional protection limits displacement.':o.family==='Halogen'?'Platform capture is the primary risk — even stable employment may see value flow to platforms.':'Employment impacts depend on policy, adoption speed, and complementarity dynamics.'}`;
+}
+
+function healthCard(o,fc){
+ const rationale=o.placement_rationale||'Placement rationale unavailable.';
+ const ciLo=Math.round((o.trs_ci_lo??o.trs_post)*100),ciHi=Math.round((o.trs_ci_hi??o.trs_post)*100);
+ const cap=Math.round(Math.max(o.iceberg_score??0,o.trs_post??0)*100),adopt=Math.round((o.surface_score??o.obs_exp??0)*100),trans=Math.round((o.trs_post??0)*100),lag=Math.round((o.structural_lag??0)*100);
+ const drivers=(o.sensitivity||[]).slice(0,4);
+ const prov=o.evidence_provenance||[], comps=o.confidence_components||[], pc=o.pvci_components||{};
+ const shells=[['Licensing',o.shell_licensing],['Physical',o.shell_physical],['Union',o.shell_union],['Sovereign',o.shell_sovereign],['Credential',Math.min(1,(o.shell_licensing*.5+o.shell_sovereign*.5))]];
+ const barrierShift=familyShiftText(o);
+ const casc=CASCADES.filter(c=>c.from===o.sym||c.to===o.sym);
+ const summary=occupationSummary(o,trans,ciLo,ciHi,lag);
+ return `<div class="health-card">
+
+ <section class="hc-section primary" style="background:color-mix(in srgb,${fc.color} 5%,var(--paper2));border-left:4px solid ${fc.color}">
+   <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+     <div>
+       <div style="font:9px/1 var(--mono);color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Transformation (TRS)</div>
+       <div style="font:600 38px/1 var(--serif);color:${trans>=50?'var(--red)':trans>=30?'var(--amb)':'var(--grn)'}">${trans}%</div>
+       <div style="font:9px/1.4 var(--mono);color:var(--ink3);margin-top:4px">${ciLo}–${ciHi}% uncertainty band · ${o.trs_tier||'≈ PRIOR'}</div>
+     </div>
+     <div style="flex:1;min-width:160px">
+       <div style="font:9px/1 var(--mono);color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">AI integration stage</div>
+       <div style="display:flex;gap:6px">
+         ${['A','T','S','D'].map(s=>`<div style="padding:4px 10px;border-radius:3px;font:600 11px var(--mono);${s===o.oxidation_state?'background:'+fc.color+';color:var(--paper)':'background:var(--paper3);color:var(--ink4)'}">${s}</div>`).join('')}
+       </div>
+       <div style="font:10px/1.4 var(--sans);color:var(--ink3);margin-top:5px">${o.oxidation_state?oxDesc(o.oxidation_state):'No stage assigned — AEI data unavailable'}</div>
+     </div>
+     <div>
+       <div style="font:9px/1 var(--mono);color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Evidence coverage</div>
+       <div style="font:600 22px/1 var(--serif);color:${o.confidence_tier==='High'?'var(--grn)':o.confidence_tier==='Medium'?'var(--amb)':'var(--red)'}">${Math.min(95,Math.round((o.confidence_score??0)*100))}%</div>
+       <div style="font:9px/1.4 var(--mono);color:var(--ink3);margin-top:4px">${o.confidence_tier||'Unknown'} · ${o.has_aei?'● AEI observed':'≈ prior only'}</div>
+     </div>
+   </div>
+   <div style="font:13px/1.65 var(--sans);color:var(--ink2);border-top:1px solid var(--rule);padding-top:10px">${summary}</div>
+   <div style="margin-top:8px;font:9px var(--mono);color:var(--ink4)">TRS measures occupational transformation probability — not job loss. Employment scenarios are shown separately in the Trajectory section.</div>
+ </section>
+
+ ${hcSection('Classification','why this occupation is placed here',`<div class="hc-grid"><div class="hc-stat"><div class="k">Family / column</div><div class="v" style="color:${fc.color}">${o.family}</div><div class="n">Column ${fc.dfam}</div></div><div class="hc-stat"><div class="k">Period / protection</div><div class="v">${o.period}</div><div class="n">Shell score ${Math.round(o.shell_score*100)}%</div></div></div><div class="note" style="margin-top:9px"><strong>Why is this here?</strong><br>${rationale}</div><div style="margin-top:8px;font:9px var(--mono)">Evidence coverage: <strong>${o.confidence_tier}</strong> (${Math.min(95,Math.round(o.confidence_score*100))}%) · Forecast confidence: <span style='color:var(--amb)'>Moderate — all forecasts carry substantive uncertainty</span></div>`,true)}
+ ${hcSection('Current state','integration, transformation, lag',`<div class="hc-grid"><div class="hc-stat"><div class="k">AI integration stage</div><div class="v">${o.oxidation_state||'—'}</div><div class="n">${o.oxidation_state?oxDesc(o.oxidation_state):'No observed stage assigned'}</div></div><div class="hc-stat"><div class="k">${metricLabel('TRS','TRS',o.trs_tier)}</div><div class="v">${trans}%</div><div class="n">CI band ${ciLo}–${ciHi}% · ${o.trs_tier||''}</div><div class="hc-bar"><i style="width:${trans}%;background:var(--red)"></i></div></div><div class="hc-stat"><div class="k">${metricLabel('LAG','Structural lag',o.has_aei?'Observed + prior':'Prior')}</div><div class="v">${lag}pp</div><div class="n">${o.lag_type||'unclassified'} barrier</div><div class="hc-bar"><i style="width:${lag}%;background:${lag>40?'var(--red)':lag>20?'var(--amb)':'var(--grn)'}"></i></div></div><div class="hc-stat"><div class="k">Most influential inputs</div>${drivers.map(d=>`<div class="n"><strong>${d.variable}</strong> · ${d.delta_trs_pp}pp (${d.influence})</div>`).join('')||'<div class="n">No sensitivity records.</div>'}</div></div>`,true)}
+ ${hcSection('Trajectory','capability → adoption → transformation',`<div class="hc-grid"><div class="hc-stat"><div class="k">${metricLabel('ICEBERG','Capability',o.has_aei?'Prior / estimated':'Prior')}</div><div class="v">${cap}%</div><div class="hc-bar"><i style="width:${cap}%;background:#6651C8"></i></div></div><div class="hc-stat"><div class="k">${metricLabel('SURFACE','Occupation adoption',o.has_aei?'Observed (AEI)':'≈ Prior')} <span style="font:8px var(--mono);color:var(--ink4)">(not economy-wide ${RAMP_CURRENT}%)</span></div><div class="v">${adopt}%</div><div class="hc-bar"><i style="width:${adopt}%;background:#3E4B91"></i></div></div><div class="hc-stat"><div class="k">Transformation</div><div class="v">${trans}%</div><div class="hc-bar"><i style="width:${trans}%;background:#8A1818"></i></div></div></div><div style="margin-top:10px">${forecastTab(o)}</div>`,true)}
+ ${hcSection('Value capture','who captures productivity gains',`<div class="hc-grid"><div class="hc-stat"><div class="k">${metricLabel('PVCI','PVCI','≈ PRIOR')}</div><div class="v">${Math.round(o.pvci*100)}%</div><div class="n">Capture vector: platform ${Math.round(o.pvci*100)} / worker ${Math.round((1-o.pvci)*100)}</div></div><div class="hc-stat"><div class="k">${metricLabel('LIR','Lock-in risk','Constructed')}</div><div class="v">${Math.round(o.lir*100)}%</div><div class="n">Systemic concentration risk</div></div></div><div class="pvci-bars" style="margin-top:9px">${Object.entries(pc).map(([k,v])=>pvciContribution(k.replaceAll('_',' '),v,'precomputed')).join('')}</div>`)}
+ ${hcSection('Evidence','provenance and confidence',`<table class="hc-table"><thead><tr><th>Source</th><th>Role</th><th>Vintage</th><th>Model weight</th><th>Contribution</th><th>Tier</th></tr></thead><tbody>${prov.map(e=>`<tr><td><strong>${e.source}</strong><br><span style="color:var(--ink3);font-size:9px">${(e.variables||[]).join(', ')}</span></td><td style="font-size:10px;color:var(--ink2)">${e.update_rule?e.update_rule.split(':')[0]:'—'}</td><td>${e.vintage||'—'}</td><td style="font-family:var(--mono)">${e.weight!=null?Math.round(e.weight*100)+'%':'—'}</td><td style="font-family:var(--mono)">${e.contribution!=null?Math.round(e.contribution*100)+'%':'—'}</td><td><span style="color:${e.tier==='● OBSERVED'?'var(--grn)':'var(--amb)'}">${e.tier||'—'}</span></td></tr>`).join('')||'<tr><td colspan="6">No provenance records.</td></tr>'}</tbody></table><div class="sec">Confidence components</div>${comps.map(c=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rule);font-size:9px"><span><strong>${c.source}</strong><br><span style="color:var(--ink3)">${c.note||''}</span></span><span style="font-family:var(--mono)">+${Math.round((c.contribution||0)*100)}%</span></div>`).join('')}`)}
+ ${hcSection('Barriers','protective shells and family-shift conditions',`<div class="shell-grid">${shells.map(([k,v])=>shC(k,v,'Precomputed shell component')).join('')}</div><div class="note" style="margin-top:9px"><strong>What would have to change?</strong><br>${barrierShift}</div><div style="margin-top:9px">${policyTab(o)}</div>`)}
+ ${hcSection('Relatives & cascades','neighbors and reaction pathways',`${relativesTab(o)}${casc.length?`<div style="margin-top:12px">${cascadesTab(o,casc)}</div>`:'<div class="note">No registered cascade for this occupation.</div>'}`)}
+ </div>`;
+}
+function familyShiftText(o){
+ if(o.family==='Noble gas')return 'A family shift requires erosion of licensing or sovereign authority below the noble-gas gate, not merely higher AI capability.';
+ if(o.family==='Care / trust')return 'A shift requires lower physical/relational dependence or weaker licensing, combined with higher digitizability and adoption.';
+ if(o.family==='Institutional bottleneck')return 'A shift requires removal of the accountable human sign-off, licensing obligation, or statutory responsibility.';
+ if(o.family==='Halogen')return 'A shift requires reduced platform dependence or stronger portability, bargaining, licensing, or sovereign protections.';
+ return 'The occupation changes family only when its precomputed gate variables cross a family threshold. Review licensing, sovereign authority, shell score, computer mediation, and reactivity in the evidence below.';
+}
+
+function propsTab(o){
+  const trsNote=o.has_aei
+    ?`~ Evidence-weighted posterior: 0.6×prior(${Math.round(o.trs_prior*100)}%) + 0.4×observed_AI_capability(${Math.round((1-o.hoa)*100)}%). Posterior: ${Math.round(o.trs_post*100)}%.`
+    :`≈ Prior: f(routine_cog=${Math.round(o.routine_cog*100)}%, digitizability, social_perc). No AEI data.`;
+
+  // Read uncertainty and component decomposition pre-computed by pipeline.py.
+  const trs_lo=o.trs_ci_lo??o.trs_post, trs_hi=o.trs_ci_hi??o.trs_post;
+  const pvci_lo=Math.max(0,o.pvci-0.06),pvci_hi=Math.min(1,o.pvci+0.06);
+  const pc=o.pvci_components||{};
+  const provenance=o.evidence_provenance||[];
+  const confidenceComponents=o.confidence_components||[];
+
+  const oxHtml=o.oxidation_state!==null?`<div class="ox-wrap">
+    <span class="ox-l">AI integration stage <small style="font-family:var(--mono);font-size:7px">~ ESTIMATED</small></span>
+    <div class="ox-states">${['A','T','S','D'].map(s=>{const a=s===o.oxidation_state;return`<div class="ox-s${a?' act':''}" style="${a?`color:${lirColor(o.lir)};border-color:${lirColor(o.lir)}`:''};min-width:22px;padding:0 4px">${s}</div>`}).join('')}</div>
+    <span class="ox-d">${oxDesc(o.oxidation_state)}</span>
+  </div>`:'';
+
+  const obsHtml=o.has_aei?`<div class="obs-card">
+    <div class="obs-ttl">● Observed — Anthropic Economic Index API, May 2026</div>
+    ${oR('Exposure index',o.obs_exp,'#1A6A38')}${oR('Automation share',o.obs_auto,'#8A1818')}
+    ${oR('Augmentation share',o.obs_aug,'#3A1A60')}${oR('Human-only ability',o.hoa,'#4A4A5C')}
+  </div>`:'';
+
+  return`${oxHtml}${obsHtml}
+    <div class="sec"><span class='tip' data-tip="Probability that current AI can perform this occupation's tasks at required quality and cost. Evidence-weighted posterior combining O*NET prior and AEI observed data.">Task Replaceability Score — TRS</span></div>
+    <div class="formula"><span class="v">TRS</span> = 0.6×[0.5×routine_cog + 0.3×digitizability + 0.2×(1-social_perc)] ≈PRIOR<br>
+      + 0.4×(1-human_only_ability) ●AEI
+    </div>
+    ${propRow('Task Replaceability Score','Atomic number',trsNote,o.trs_post,'#8A1818',trs_lo,trs_hi)}
+    <div class="sec"><span class='tip' data-tip='Constructed index estimating what share of productivity gains flow to platform/infrastructure owners rather than workers. 6 components; all prior except sw_ratio from O*NET.'>Platform Value Capture Index — PVCI · 6 components</span></div>
+    <div class="formula"><span class="v">PVCI</span> = Σ wᵢ×componentᵢ &nbsp;≈PRIOR &nbsp;(constructed index, not observed rate)</div>
+    <div class="pvci-bars">
+      ${pvciContribution('Output digitizability',pc.digitizability,'Pipeline output')}
+      ${pvciContribution('Platform sw ratio',pc.platform_sw_ratio,'Pipeline output')}
+      ${pvciContribution('Computer mediation',pc.comp_mediation,'Pipeline output')}
+      ${pvciContribution('Switching cost proxy',pc.switching_cost,'Pipeline output')}
+      ${pvciContribution('Output portability',pc.output_portability,'Pipeline output')}
+      ${pvciContribution('Market concentration',pc.market_concentration,'Pipeline output')}
+    </div>
+    ${propRow('Platform Value Capture Index','Electronegativity','Constructed index. Cashier (payment rails) ≈ Radiologist (imaging EHR) on PVCI — different mechanisms, same capture outcome.',o.pvci,'var(--amb)',pvci_lo,pvci_hi)}
+    <div class="sec"><span class='tip' data-tip='Five institutional, physical, and legal barriers that prevent human removal after AI capability reaches threshold. Their weighted sum determines the period (row) position.'>Protective shells — why period ${o.period}</span></div>
+    <div class="formula"><span class="v">DR</span> = 0.30×lic + 0.20×phys + 0.20×union + 0.20×sov + 0.10×cred ≈PRIOR</div>
+    <div class="shell-grid">
+      ${shC('Licensing',o.shell_licensing,'Required license, statutory scope')}
+      ${shC('Physical',o.shell_physical,'O*NET physical proximity')}
+      ${shC('Union',o.shell_union,'BLS CPS Table 42, 2025')}
+      ${shC('Sovereign',o.shell_sovereign,'Named liability / public authority')}
+      ${shC('Credential',Math.min(1,(o.shell_licensing*0.5+o.shell_sovereign*0.5)),'Depth of specialised expertise')}
+    </div>
+    ${propRow('Displacement Resistance','Ionization energy','Five shells weighted by AI-resistance contribution. Shell score → period via thresholds in placement algorithm.',o.dr,'var(--grn)',o.dr-0.06,o.dr+0.06)}
+    ${propRow('Transferable Skill Count','Valence electrons','f(comp_mediation, analytical activities, O*NET adjacency). High = lateral mobility after displacement.',o.tsc,'var(--acc)',o.tsc-0.05,o.tsc+0.05)}
+    <div class="sec">Evidence provenance</div>
+    <div class="obs-card">${provenance.map(e=>`<div style="padding:6px 0;border-bottom:1px solid var(--rule)"><strong>${e.source}</strong> <span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">${e.vintage||''} · weight ${e.weight??'—'} · ${e.tier||''}</span><div style="font-size:9px;color:var(--ink3);margin-top:2px">${e.update_rule||''}</div></div>`).join('')||'<div>No provenance records.</div>'}</div>
+    <div class="sec">Confidence components</div>
+    <div class="obs-card">${confidenceComponents.map(c=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--rule)"><span><strong>${c.source}</strong><br><small style="color:var(--ink3)">${c.note||''}</small></span><span style="font-family:var(--mono)">+${Math.round((c.contribution||0)*100)}%</span></div>`).join('')||'<div>No confidence components.</div>'}</div>
+    <div class="note">TRS interval and confidence fields are pre-computed in pipeline.py and read directly from data.json. The browser performs presentation only.</div>
+  `;
+}
+
+function pvciComp(label,weight,val,source){
+  const contrib=Math.round(val*weight*100);
+  return`<div class="pvc-row"><span class="l">${label}</span><span class="w">×${Math.round(weight*100)}%</span>
+    <div class="pvc-bg"><div class="pvc-fill" style="width:${Math.round(val*100)}%"></div></div>
+    <span class="pvc-v">${contrib}%</span>
+  </div><div style="font-size:7.5px;color:var(--ink4);margin:-2px 0 5px 140px;font-style:italic">${source}</div>`;
+}
+
+function pvciContribution(label,contribution,source){
+  const c=Math.max(0,Number(contribution)||0);
+  return`<div class="pvc-row"><span class="l">${label}</span><span class="w">precomputed</span><div class="pvc-bg"><div class="pvc-fill" style="width:${Math.min(100,Math.round(c*500))}%"></div></div><span class="pvc-v">${Math.round(c*100)}pp</span></div><div style="font-size:7.5px;color:var(--ink4);margin:-2px 0 5px 140px;font-style:italic">${source}</div>`;
+}
+
+function propRow(label,chem,note,val,color,lo,hi){
+  const pct=Math.round(val*100),loPct=Math.round((lo||val)*100),hiPct=Math.round((hi||val)*100);
+  return`<div class="pr"><div class="prl"><strong>${chem}</strong><span>${label}</span></div>
+    <div class="pbg">
+      <div class="pbf" style="width:${pct}%;background:${color}"></div>
+      ${lo!==undefined?`<div class="pband" style="left:${loPct}%;width:${hiPct-loPct}%;background:${color}"></div>`:''}
+    </div>
+    <div class="pv">${pct}%</div>
+  </div><div class="pn">${note}</div>`;
+}
+
+function oR(l,v,c){return`<div class="or"><span class="l">${l}</span><div class="mb"><div class="mf" style="width:${Math.round(v*100)}%;background:${c}"></div></div><span class="on">${Math.round(v*100)}%</span></div>`}
+function shC(l,v,src){const pct=Math.round(v*100);const c=v>.7?'var(--grn)':v>.4?'var(--amb)':'var(--red)';return`<div class="shc" title="${src}"><div class="sh-n" style="color:${c}">${pct}<span style="font-size:8px">%</span></div><div class="sh-l">${l}</div></div>`}
+
+function forecastTab(o){
+  const lc=lirColor(o.lir);
+  const hl=HALF_LIFE[o.soc];
+  const bls=o.bls_proj_pct>=0?`+${o.bls_proj_pct}%`:`${o.bls_proj_pct}%`;
+  const ice=o.iceberg_score, surf=o.surface_score, lag=o.structural_lag;
+
+  // ── Layer 1: AI Capability ────────────────────────────────────
+  // iceberg_score = what AI can technically do (MIT Project Iceberg)
+  // trs_post = our Evidence-weighted posterior of replaceability
+  const capScore = ice!=null ? Math.round(Math.max(o.trs_post, ice)*100) : Math.round(o.trs_post*100);
+
+  // ── Layer 2: Enterprise Adoption ─────────────────────────────
+  // surface_score = current observed adoption
+  // Ramp AI Index = 54.95% of businesses spending on AI tools (Jun 2026)
+  const adoptScore = surf!=null ? Math.round(surf*100) : Math.round(o.obs_exp*100);
+  // Logistic adoption midpoint: when does org adoption reach threshold?
+  // Threshold: Ramp >30% → organizational transition begins
+  const adoptThreshold = 0.30; // enterprise adoption rate that triggers org change
+  const rampCurrent = RAMP_CURRENT/100;
+  const adoptProgress = Math.min(1, rampCurrent/0.70); // normalised 0→1 as Ramp goes 0→70%
+  const orgTransitionTriggered = rampCurrent >= adoptThreshold;
+
+  // ── Layer 3: Structural Transformation ────────────────────────
+  // f(Capability, Adoption, DR, Physical, Regulation, Complementarity)
+  const dr = o.dr;
+  const complementarity = o.obs_aug||0; // AEI augmentation share = complementarity signal
+  // Structural transformation score = how much has the occupation already changed?
+  const stScore = Math.round(Math.min(100, capScore * adoptProgress * (1-dr*0.6)  * 100));
+
+  // ── Evidence timeline ──────────────────────────────────────────
+  const evidenceLog = buildEvidenceLog(o);
+
+  return`<div class="sec" style="margin-top:0">Three-layer forecast model — transformation probability</div>
+    <div style="font-size:10px;color:var(--ink3);margin-bottom:10px;line-height:1.5;font-style:italic">TRS measures the probability and degree of <em>occupational transformation</em> over 10 years — not job loss. Employment impacts are shown separately as scenario analyses below. Each layer is a latent state updated as new evidence arrives.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+
+      <div style="background:color-mix(in srgb,#4A4A5C 8%,var(--paper2));border:1px solid var(--rule);border-radius:4px;padding:10px 11px">
+        <div style="font-family:var(--mono);font-size:8px;color:#4A4A5C;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Layer 1 · Capability</div>
+        <div style="font-family:var(--serif);font-size:28px;color:#4A4A5C;line-height:1;margin-bottom:3px">${capScore}%</div>
+        <div style="font-size:9.5px;color:var(--ink3);line-height:1.4">What AI can technically perform<br><span style="font-family:var(--mono);font-size:8px">${ice!=null?'MIT Iceberg + AEI':'O*NET prior'}</span></div>
+      </div>
+
+      <div style="background:color-mix(in srgb,#3E4B91 8%,var(--paper2));border:1px solid var(--rule);border-radius:4px;padding:10px 11px">
+        <div style="font-family:var(--mono);font-size:8px;color:#3E4B91;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Layer 2 · Adoption</div>
+        <div style="font-family:var(--serif);font-size:28px;color:#3E4B91;line-height:1;margin-bottom:3px">${adoptScore}%</div>
+        <div style="font-size:9.5px;color:var(--ink3);line-height:1.4">What orgs currently deploy<br><span style="font-family:var(--mono);font-size:8px">${o.has_aei?'● AEI observed':'≈ prior'} · Ramp ${RAMP_CURRENT}%</span></div>
+      </div>
+
+      <div style="background:color-mix(in srgb,${lc} 8%,var(--paper2));border:1px solid var(--rule);border-radius:4px;padding:10px 11px">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Layer 3 · Transformation</div>
+        <div style="font-family:var(--serif);font-size:28px;color:${lc};line-height:1;margin-bottom:3px">${stScore}%</div>
+        <div style="font-size:9.5px;color:var(--ink3);line-height:1.4">Structural change realised<br><span style="font-family:var(--mono);font-size:8px">f(cap, adopt, DR, complementarity)</span></div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:var(--ink2);background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;margin-bottom:12px;line-height:1.55">
+      <strong>Pipeline:</strong> AI Capability → Enterprise Adoption → Evidence-weighted updates → Structural Transformation (TRS) → Forecast distribution<br>
+      ${orgTransitionTriggered
+        ? `<span style="color:#3E4B91">◑ Enterprise adoption (Ramp ${RAMP_CURRENT}%) has crossed the 30% organisational transition threshold. Structural transformation is now adoption-constrained, not capability-constrained.</span>`
+        : `<span style="color:var(--ink3)">◇ Enterprise adoption not yet at 30% threshold for broad organisational transition.</span>`}
+    </div>
+
+    ${hl?`<div style="font-size:10px;color:var(--ink2);background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;margin-bottom:12px">
+      <strong style="font-family:var(--mono);font-size:8px;color:var(--ink3);display:block;margin-bottom:3px">HALF-LIFE ◇ SCENARIO</strong>
+      ${hl.y?`Estimated ${hl.y} years until >50% of task-hours redistributed.`:'No credible displacement mechanism in 10-year horizon.'} ${hl.note}
+    </div>`:''}
+
+    <div class="sec">Evidence log — Evidence-weighted updates to TRS</div>
+    <div id="evLogWrap">${evidenceLog}</div>
+
+    <div class="sec">Structural transformation forecast — employment distribution</div>
+    <div class="chart-leg">
+      <span><span class="cl" style="background:#8A1818"></span>No intervention (elasticity 0.9)</span>
+      <span><span class="cl" style="background:#1A6A38"></span>Proactive policy (elasticity 0.3)</span>
+      <span><span class="cl" style="background:#1A3A5A"></span>BLS group projection</span>
+    </div>
+    <div class="cw"><canvas id="fcChart" role="img" aria-label="Employment forecast for ${o.name} 2024–2034"></canvas></div>
+    <div style="font-size:8.5px;color:var(--ink3);margin-bottom:7px;line-height:1.5">
+      The adoption component uses a logistic curve (not the occupation forecast itself). Structural transformation = f(capability, adoption, DR, complementarity). BLS group: <strong>${bls}</strong> 2023–33.
+    </div>
+    <div class="formula">Structural transformation = f(TRS, Adoption_logistic, DR, complementarity)
+      <br>Adoption_logistic(t) = 1/(1+exp(−k×(t−t_mid))) · k = f(structural_lag_type)
+      <br>Emp_forecast = Emp_base × (1 − ST × elasticity) × BLS_multiplier
+      <br><span style="color:var(--ink4)">◇ SCENARIO · elasticity [0.3, 0.9] from Acemoglu-Restrepo 2022 · model snapshot 2026.07</span></div>`;
+}
+
+function buildEvidenceLog(o){
+  // Build a structured evidence timeline showing what updated the TRS posterior
+  const entries=[];
+
+  // Entry 1: Prior from O*NET
+  entries.push({
+    date:'Model init 2026.07',
+    type:'prior',
+    label:'O*NET prior',
+    desc:`Task structure analysis: routine_cog=${Math.round(o.routine_cog*100)}%, digitizability=${Math.round(o.digitizability*100)}%. Prior TRS: ${Math.round(o.trs_prior*100)}%.`,
+    trs: o.trs_prior,
+    tier:'≈ PRIOR'
+  });
+
+  // Entry 2: Iceberg capability (if available)
+  if(o.iceberg_score!=null){
+    entries.push({
+      date:'MIT Project Iceberg 2025',
+      type:'capability',
+      label:'Iceberg capability score',
+      desc:`${Math.round(o.iceberg_score*100)}% of skills technically automatable (wage-weighted). Structural lag: ${Math.round(o.structural_lag*100)}pp (lag type: ${o.lag_type}).`,
+      trs: null,
+      tier:'≈ PRIOR'
+    });
+  }
+
+  // Entry 3: AEI observed (if available)
+  if(o.has_aei){
+    const posterior = o.trs_post;
+    entries.push({
+      date:'Anthropic Economic Index · May 2026',
+      type:'observed',
+      label:'AEI Evidence-weighted update',
+      desc:`Observed: auto_share=${Math.round(o.obs_auto*100)}%, aug_share=${Math.round(o.obs_aug*100)}%, human_only=${Math.round(o.hoa*100)}%. Update: 0.6×prior + 0.4×(1−hoa). Posterior TRS: ${Math.round(posterior*100)}%.`,
+      trs: posterior,
+      tier:'● OBSERVED'
+    });
+  }
+
+  // Entry 4: Ramp enterprise adoption context
+  entries.push({
+    date:'Ramp AI Index · Jun 2026',
+    type:'adoption',
+    label:'Enterprise adoption signal',
+    desc:`${RAMP_CURRENT}% of tracked businesses spending on AI tools. Census BTOS: ${CENSUS_CURRENT}%. Adoption crossed 30% threshold in 2024 — organizational transition underway in frontier firms.`,
+    trs: null,
+    tier:'● OBSERVED'
+  });
+
+  // Entry 5: BLS group projection
+  const blsStr = o.bls_proj_pct>=0?`+${o.bls_proj_pct}%`:`${o.bls_proj_pct}%`;
+  entries.push({
+    date:'BLS Employment Projections 2023–33',
+    type:'bls',
+    label:'BLS group employment anchor',
+    desc:`${o.name} occupational group projected at ${blsStr} over 10 years. Used as baseline employment multiplier, not occupation-level forecast.`,
+    trs: null,
+    tier:'● OBSERVED'
+  });
+
+  const typeColors={prior:'#9C9C84',capability:'#4A4A5C',observed:'#1A6A38',adoption:'#3E4B91',bls:'#1A3A5A'};
+  const tierColors={'● OBSERVED':'var(--grn)','≈ PRIOR':'var(--amb)','~ ESTIMATED':'var(--acc)'};
+
+  return entries.map((e,i)=>`
+    <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start">
+      <div style="width:8px;height:8px;border-radius:50%;background:${typeColors[e.type]||'var(--ink4)'};flex-shrink:0;margin-top:4px"></div>
+      <div style="flex:1;padding:8px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:3px">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:3px;flex-wrap:wrap">
+          <span style="font-size:10.5px;font-weight:600">${e.label}</span>
+          <span style="font-family:var(--mono);font-size:8px;color:${tierColors[e.tier]||'var(--ink4)'}">${e.tier}</span>
+          ${e.trs!=null?`<span style="font-family:var(--mono);font-size:9px;color:var(--acc);margin-left:auto">→ TRS ${Math.round(e.trs*100)}%</span>`:''}
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink4);margin-bottom:3px">${e.date}</div>
+        <div style="font-size:10px;color:var(--ink2);line-height:1.5">${e.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderChart(o){
+  if(activeChart){activeChart.destroy();activeChart=null}
+  setTimeout(()=>{
+    const cv=document.getElementById('fcChart');if(!cv)return;
+    const yrs=[2024,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034];
+    const base=o.emp/1000, trs=o.trs_post, dr=o.dr, bls=o.bls_proj_pct/100;
+
+    // ── ADOPTION LAYER: logistic curve for the adoption component only ──
+    // Speed of adoption depends on lag type (not occupation forecast directly)
+    const lagSpeedMap={'minimal':0.8,'organizational':0.5,'institutional':0.25,'physical':0.20,'physical+institutional':0.18,'physical+licensing':0.18,'physical+regulatory':0.15,'physical+organizational':0.22,'institutional+organizational':0.22};
+    const k = lagSpeedMap[o.lag_type||'organizational'] || 0.5;
+    // Mid-point: when does adoption reach 50%? Based on Ramp current trajectory
+    const adoptMid = 2026 + (1 - (RAMP_CURRENT/100)) * 6; // later for lower adoption
+    function adoptLogistic(y){ return 1/(1+Math.exp(-k*(y-adoptMid))); }
+
+    // ── STRUCTURAL TRANSFORMATION: f(capability, adoption, DR, complementarity) ──
+    const complementarity = Math.max(0.05, o.obs_aug||0.05);
+    function structTransform(y, elasticity){
+      const adopt = adoptLogistic(y);
+      const capEffect = trs * adopt;      // capability × organisational adoption
+      const resistEffect = dr * 0.6;     // institutional resistance dampens
+      const compEffect = complementarity * 0.4; // augmentation creates demand
+      return Math.max(0, capEffect*(1-resistEffect) - compEffect) * elasticity;
+    }
+
+    const blsLine = yrs.map(y => base*(1+bls*(y-2024)/10));
+
+    // No intervention: elasticity 0.9
+    const ni = yrs.map(y => base * (1 - structTransform(y, 0.9)) * (1+bls*(y-2024)/10));
+    // Proactive policy: elasticity 0.3
+    const pr = yrs.map(y => base * (1 - structTransform(y, 0.3)) * (1+bls*(y-2024)/10));
+
+    // Fan = uncertainty band between the two
+    const fanLo = yrs.map((_,i)=>Math.min(ni[i],pr[i]));
+    const fanHi = yrs.map((_,i)=>Math.max(ni[i],pr[i]));
+
+    // Add Ramp adoption curve as secondary axis proxy (scaled to employment range)
+    const adoptCurve = yrs.map(y => {
+      const aRange = Math.max(...fanHi) - Math.min(...fanLo);
+      const aMin = Math.min(...fanLo);
+      return aMin + adoptLogistic(y) * aRange * 0.3; // scaled just for shape reference
+    });
+
+    const all=[...blsLine,...ni,...pr];
+    const mn=Math.min(...all)*0.93, mx=Math.max(...all)*1.05;
+
+    activeChart=new Chart(cv,{type:'line',data:{labels:yrs,datasets:[
+      {label:'Fan',data:fanHi,borderColor:'transparent',backgroundColor:'rgba(138,24,24,.06)',borderWidth:0,pointRadius:0,fill:true,tension:.4},
+      {label:'Fan_lo',data:fanLo,borderColor:'transparent',backgroundColor:'var(--paper)',borderWidth:0,pointRadius:0,fill:true,tension:.4},
+      {label:'No intervention',data:ni,borderColor:'#8A1818',borderWidth:2,pointRadius:0,fill:false,tension:.4},
+      {label:'Proactive policy',data:pr,borderColor:'#1A6A38',borderWidth:1.5,pointRadius:0,fill:false,tension:.4,borderDash:[3,3]},
+      {label:'BLS group',data:blsLine,borderColor:'#1A3A5A',borderWidth:1,pointRadius:0,fill:false,tension:.1,borderDash:[4,4]},
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        callbacks:{label:c=>c.dataset.label.startsWith('Fan')?null:`${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString()}K`},
+        filter:c=>!c.dataset.label.startsWith('Fan'),
+        backgroundColor:'#F2EFE6',titleColor:'#1C1C14',bodyColor:'#555548',borderColor:'#C9C5B8',borderWidth:1}},
+      scales:{
+        x:{grid:{color:'rgba(28,28,20,.05)'},ticks:{color:'#9C9C84',font:{size:8.5,family:'JetBrains Mono'}}},
+        y:{min:mn,max:mx,grid:{color:'rgba(28,28,20,.05)'},ticks:{color:'#9C9C84',font:{size:8.5,family:'JetBrains Mono'},callback:v=>`${Math.round(v).toLocaleString()}K`}}
+      }
+    }});
+  },80);
+}
+
+
+function captureTab(o){
+  const p=o.pvci,dr=o.dr;
+  let w=Math.round(Math.max(3,(1-p)*36+dr*8)),e=Math.round(17+dr*14),av=Math.round(p*27),mc=Math.round(p*20+(o.family==='Halogen'?8:0)),co=Math.round(7+(1-p)*6),pu=Math.round(4);
+  const tot=w+e+av+mc+co+pu,n=100/tot;
+  [w,e,av,mc,co,pu]=[w,e,av,mc,co,pu].map(x=>Math.round(x*n));pu=100-(w+e+av+mc+co);
+  return`<div class="sec" style="margin-top:0">Value capture vector — 6 actors</div>
+    <div class="cpc"><div class="cpc-ttl">≈ PRIOR · PVCI=${Math.round(p*100)}% · DR=${Math.round(dr*100)}% · ${o.family}</div>
+      ${cR('Workers',w,'#1A5A30')}${cR('Employers',e,'#1A3A5A')}
+      ${cR('App vendors',av,'#7A5010')}${cR('Model / cloud',mc,'#8A1818')}
+      ${cR('Consumer',co,'#3A1A60')}${cR('Public',pu,'#4A4A5C')}
+    </div>
+    ${o.family==='Halogen'?`<div style="font-size:9.5px;color:var(--amb);background:rgba(122,80,16,.07);border:1px solid rgba(122,80,16,.22);border-radius:3px;padding:7px 9px;margin-bottom:9px;line-height:1.5">Halogen — automated output strongly attracted to platform infrastructure. Portability mandates or profit-sharing are the primary intervention levers.</div>`:''}
+    <div class="sec">PVCI component contributions</div>
+    ${pvciComp('Output digitizability',0.20,o.digitizability,'comp_mediation×(1-physical_presence)')}
+    ${pvciComp('Platform sw ratio',0.20,o.sw_ratio,'O*NET hot technology share')}
+    ${pvciComp('Computer mediation',0.18,o.comp_mediation,'O*NET Interacting with Computers')}
+    ${pvciComp('Switching cost proxy',0.16,o.sw_ratio*0.7+o.digitizability*0.3,'Proprietary sw dependency')}
+    ${pvciComp('Output portability',0.14,1-o.shell_physical*0.5,'Inverse physical presence')}
+    ${pvciComp('Concentration (prior)',0.12,0.60,'BLS HHI — future version')}
+    <div class="note">≈ PRIOR throughout. Future versions incorporate firm-level ownership data and industry HHI from BLS Economic Census.</div>`;
+}
+
+function cR(a,v,c){return`<div class="cpr"><span class="cpa">${a}</span><div class="cpbg"><div class="cpb" style="width:${v}%;background:${c}"></div></div><span class="cpp">${v}%</span></div>`}
+
+function cascadesTab(o,cas){
+  return`<div class="sec" style="margin-top:0">Reaction pathways involving ${o.sym}</div>
+    ${cas.map(c=>{
+      const isFrom=c.from===o.sym;
+      const other=window.DATA.find(d=>d.sym===(isFrom?c.to:c.from));
+      const typeColor=c.type==='demand-reduction'?'var(--red)':c.type==='co-displacement'?'var(--amb)':'var(--grn)';
+      return`<div class="cas-item" onclick="other&&showPanel(other)">
+        <div style="display:flex;align-items:center;font-size:10.5px;font-weight:500">
+          <span style="font-family:var(--serif);font-size:16px">${c.from}</span>
+          <span class="cas-arrow">${c.type==='complementary'?'↑':'→'}</span>
+          <span style="font-family:var(--serif);font-size:16px">${c.to}</span>
+          <span class="cas-strength" style="color:${typeColor}">${c.strength}</span>
+          <span style="font-family:var(--mono);font-size:7.5px;color:var(--ink4);margin-left:6px">${c.type.replace('-',' ')}</span>
+        </div>
+        <div class="cas-desc">${c.desc}</div>
+      </div>`;
+    }).join('')}
+    <div class="note">Cascade strength is a prior estimate. Demand-reduction cascades: automation reduces downstream demand. Co-displacement: parallel automation. Complementary: automation increases demand for adjacent role.</div>`;
+}
+
+function isotopesTab(o,isos){
+  return`<div class="sec" style="margin-top:0">Isotopes — same occupation, different institution</div>
+    <div style="font-size:9.5px;color:var(--ink2);margin-bottom:10px;line-height:1.5">Isotopes share the same task core (same SOC) but differ in institutional mass. They do not relocate on the table — they adjust property scores within the same position.</div>
+    ${isos.map(iso=>`<div class="iso-card">
+      <div class="iso-title">${iso.label}</div>
+      <div class="iso-meta">DR: ${Math.round((o.dr+(iso.dr_d||0))*100)}% (${(iso.dr_d||0)>=0?'+':''}${Math.round((iso.dr_d||0)*100)}pp) &nbsp;·&nbsp; TRS: ${Math.round((o.trs_post+(iso.trs_d||0))*100)}% &nbsp;·&nbsp; PVCI: ${Math.round((o.pvci+(iso.pvci_d||0))*100)}%</div>
+      <div class="iso-bars">
+        ${['DR','TRS','PVCI'].map((l,i)=>{const vs=[o.dr+(iso.dr_d||0),o.trs_post+(iso.trs_d||0),o.pvci+(iso.pvci_d||0)];const cs=['var(--grn)','var(--red)','var(--amb)'];return`<div class="iso-bw"><div class="iso-bl">${l}</div><div class="iso-bg"><div class="iso-bf" style="width:${Math.round(vs[i]*100)}%;background:${cs[i]}"></div></div></div>`}).join('')}
+      </div>
+      <div class="iso-note">${iso.note}</div>
+    </div>`).join('')}
+    <div class="note">◇ SCENARIO · Isotope deltas are theory-informed priors. Future versions will estimate from firm-level microdata.</div>`;
+}
+
+function policyTab(o){
+  return`<div class="pol-card">
+    <div class="pol-ttl">◇ SCENARIO — levers shift model parameters, not AI capability</div>
+    ${pS('portability','Data portability mandate','→ switching cost, vendor dependency')}
+    ${pS('profitShare','Worker profit-sharing law','→ capture distribution')}
+    ${pS('bargaining','Collective bargaining','→ DR shell score, worker capture')}
+    ${pS('publicCompute','Public compute / open models','→ market concentration')}
+    <button class="pol-reset" onclick="resetPol()">Reset</button>
+  </div>
+  <div id="pol-out"></div>
+  <div class="note">Each lever targets a specific model parameter under a stated elasticity assumption. See model card for full derivation.</div>`;
+}
+
+function pS(id,n,d){const v=Math.round((polMods[id]||0)*100);return`<div class="pol-row"><div class="pol-n">${n}<small>${d}</small></div><input type="range" min="0" max="100" value="${v}" step="5" oninput="updatePol('${id}',this.value/100);document.getElementById('pv-${id}').textContent=this.value+'%'"/><span class="pol-v" id="pv-${id}">${v}%</span></div>`}
+function updatePol(k,v){polMods[k]=v;renderPolOut()}
+function resetPol(){polMods={portability:0,profitShare:0,bargaining:0,publicCompute:0};if(activeOcc)renderPanel(activeOcc)}
+function renderPolOut(){
+  const el=document.getElementById('pol-out');if(!el||!activeOcc)return;
+  const o=activeOcc,p=polMods,tot=(p.portability+p.profitShare+p.bargaining+p.publicCompute)/4;
+  if(!tot){el.innerHTML='<div style="font-size:9.5px;color:var(--ink3);font-style:italic;padding:5px 0">Move a lever to see modelled effect.</div>';return}
+  const adjDR=Math.min(1,o.dr+p.bargaining*0.14),adjLIR=Math.max(0,o.lir-p.portability*0.11-p.profitShare*0.08-p.bargaining*0.10-p.publicCompute*0.06);
+  el.innerHTML=`<div class="sce sc-g"><strong>With current levers (${Math.round(tot*100)}% mean)</strong>DR: ${Math.round(o.dr*100)}% → ${Math.round(adjDR*100)}% · LIR: ${Math.round(o.lir*100)} → ${Math.round(adjLIR*100)}<br>Worker capture: +${Math.round(p.profitShare*16+p.bargaining*10)}pp · Platform: -${Math.round(p.portability*14+p.publicCompute*9)}pp</div>`;
+}
+
+function relativesTab(o){
+  const peers=window.DATA.filter(d=>d.sym!==o.sym&&d.family===o.family&&!d.fblock).sort((a,b)=>Math.abs(a.trs_post-o.trs_post)-Math.abs(b.trs_post-o.trs_post)).slice(0,4);
+  return`<div class="sec" style="margin-top:0">O*NET structural relatives</div>
+    ${(o.onet_neighbors||[]).slice(0,4).map(n=>`<div class="nbr" style="cursor:default"><div class="nbr-info"><div class="nbr-name">${n}</div><div class="nbr-why">O*NET Primary-Short relatedness · O*NET 29.3</div></div></div>`).join('')}
+    <div class="sec">VALENCE family peers — same periodic family</div>
+    ${peers.map(d=>`<div class="nbr" onclick="showPanel(window.DATA.find(x=>x.sym==='${d.sym}'))">
+      <div class="nbr-sym" style="color:${pvciColor(d.pvci)}">${d.sym}</div>
+      <div class="nbr-info"><div class="nbr-name">${d.name}</div>
+      <div class="nbr-why">${d.family} · TRS ${Math.round(d.trs_post*100)}% · PVCI ${Math.round(d.pvci*100)}% · Period ${d.period}</div></div>
+    </div>`).join('')}
+    <div class="note">Family peers should exhibit analogous adoption timing, value-capture dynamics, and policy sensitivity — even across industries. This is the predictive claim of the VALENCE classification system.</div>`;
+}
+
+function switchTab(n,btn){
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('act'));
+  btn.classList.add('act');document.getElementById('tp-'+n).classList.add('act');
+  if(n==='forecast'&&activeOcc)renderChart(activeOcc);
+  if(n==='iceberg')setTimeout(renderRampChart,80);
+  if(n==='policy')renderPolOut();
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.querySelectorAll('.el').forEach(e=>e.classList.remove('hl','dm'));
+  if(activeChart){activeChart.destroy();activeChart=null}activeOcc=null;
+}
+
+/* ── CASCADES PAGE ── */
+function buildCascades(){
+  const el=document.getElementById('cascadeContent');if(!el)return;
+
+  // Group by type
+  const byType={};
+  CASCADES.forEach(c=>{if(!byType[c.type])byType[c.type]=[]; byType[c.type].push(c)});
+
+  const typeLabels={'demand-reduction':'Demand-reduction cascades','co-displacement':'Co-displacement cascades','complementary':'Complementary cascades (demand creation)'};
+  const typeColors={'demand-reduction':'var(--red)','co-displacement':'var(--amb)','complementary':'var(--grn)'};
+
+  let html='';
+  Object.entries(byType).forEach(([type,items])=>{
+    html+=`<div class="sec">${typeLabels[type]||type}</div>`;
+    items.forEach(c=>{
+      const fromEl=window.DATA?.find(d=>d.sym===c.from);
+      const toEl=window.DATA?.find(d=>d.sym===c.to);
+      html+=`<div style="background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+          <span style="font-family:var(--serif);font-size:22px;cursor:pointer;color:${pvciColor(fromEl?.pvci||0.4)}" onclick="showPanel(window.DATA.find(d=>d.sym==='${c.from}'));showPage('table',document.querySelector('.nt'))">${c.from}</span>
+          <div>
+            <div style="font-size:10.5px;font-weight:500">${fromEl?.name||c.from}</div>
+            <div style="font-size:8.5px;color:var(--ink3)">${fromEl?.family||''} · PVCI ${Math.round((fromEl?.pvci||0)*100)}%</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:14px;color:${typeColors[type]};margin:0 6px">${type==='complementary'?'↑':'→'}</span>
+          <span style="font-family:var(--serif);font-size:22px;cursor:pointer;color:${pvciColor(toEl?.pvci||0.4)}" onclick="showPanel(window.DATA.find(d=>d.sym==='${c.to}'));showPage('table',document.querySelector('.nt'))">${c.to}</span>
+          <div>
+            <div style="font-size:10.5px;font-weight:500">${toEl?.name||c.to}</div>
+            <div style="font-size:8.5px;color:var(--ink3)">${toEl?.family||''} · PVCI ${Math.round((toEl?.pvci||0)*100)}%</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:8.5px;padding:2px 7px;border-radius:2px;background:var(--paper3);color:var(--ink3);margin-left:auto">${c.strength}</span>
+        </div>
+        <div style="font-size:10px;color:var(--ink2);line-height:1.55">${c.desc}</div>
+      </div>`;
+    });
+  });
+
+  html+=`<div class="sec">Catalysts — events that change the model</div>`;
+  const catByType={};
+  CATALYSTS.forEach(cat=>{if(!catByType[cat.category])catByType[cat.category]=[];catByType[cat.category].push(cat)});
+  const catColors={'Capability':'#6651C8','Deployment':'#3E4B91','Policy':'#7B3A70','Economic':'#816000','Social':'#39734A'};
+  const statusColors={'observed':'#1A6A38','emerging':'#3E4B91','forecast':'#816000','scenario':'#67655E'};
+  const statusLabels={'observed':'● Observed','emerging':'◑ Emerging','forecast':'◇ Forecast','scenario':'◇ Scenario'};
+  Object.entries(catByType).forEach(([cat,items])=>{
+    html+=`<div style="font-family:var(--mono);font-size:10px;font-weight:600;color:${catColors[cat]||'var(--ink3)'};text-transform:uppercase;letter-spacing:.08em;margin:20px 0 9px;padding-bottom:5px;border-bottom:1px solid var(--rule)">${cat} catalysts</div>`;
+    items.forEach(c=>{
+      const sc=statusColors[c.status]||'var(--ink3)';
+      const sl=statusLabels[c.status]||c.status;
+      html+=`<div class="cat-item" style="background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;margin-bottom:8px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px;flex-wrap:wrap">
+          <div class="cat-name">${c.name}</div>
+          <span style="font-family:var(--mono);font-size:10px;color:${sc};font-weight:600">${sl}</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--ink4)">${c.date}</span>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
+          ${c.families.map(f=>`<span style="font-family:var(--mono);font-size:9px;padding:2px 7px;background:var(--paper3);border:1px solid var(--rule2);border-radius:2px;color:var(--ink3)">${f}</span>`).join('')}
+        </div>
+        <div class="cat-effect">${c.effect}</div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML=html;
+}
+
+/* ── VALIDATION PAGE ── */
+function buildValidation(){
+  const preds=[
+    {sym:'De',name:'Data Entry',soc:'43-9021',claim:'Occupation will show measurable employment decline in BLS OES May 2025 release, consistent with AEI showing 99.3% automation share and BLS group projection of -3.5%.',evidence:'AEI May 2026: obs_auto=99.3%, obs_exp=0.253. BLS Office/Admin group: -3.5% projected. VALENCE LIR: 86/100.',testDate:'BLS OES May 2025',status:'pending'},
+    {sym:'Sd',name:'Software Dev',soc:'15-1252',claim:'Software developer employment will grow despite AEI showing 83.6% automation share — demand expansion (BLS +12.9%) will exceed substitution. AEI augmentation share will remain above 14%.',evidence:'AEI: aug_share=16.4%, obs_exp=0.208. High TSC (0.57) + BLS +12.9% group projection support demand expansion.',testDate:'Next AEI release',status:'pending'},
+    {sym:'Tc',name:'Teacher (K-12)',soc:'25-2021',claim:'Teacher AEI augmentation share (currently 26.9%, highest in dataset) will remain above 20% in next release, confirming care/trust family complementarity pattern.',evidence:'AEI: aug_share=26.9%, auto_share=73.1%. Shell score 0.99 — highest in table. Care/trust family predicts sustained augmentation.',testDate:'Next AEI release',status:'pending'},
+    {sym:'An',name:'Data Analyst',soc:'15-2051',claim:'Data analysts (col 17, Halogen) will show faster observed-exposure growth than Boundary/metalloid occupations (col 9) in subsequent AEI releases.',evidence:'An: obs_exp=0.756 (2nd highest). Boundary mean obs_exp: ~0.05. Halogen family predicts higher and faster exposure accumulation.',testDate:'Next AEI release',status:'pending'},
+    {sym:'Nrs',name:'Nurse (RN)',soc:'29-1141',claim:'Nurse (RN) augmentation share will remain higher than Bookkeeper or Admin Asst. augmentation share in next AEI release, confirming care/trust vs. rapid-substituter family divergence.',evidence:'AEI: Nrs aug=7.0%, Bk aug=2.8%, Ad aug=5.4%. Care/trust family predicts sustained complementarity vs. substituter family.',testDate:'Next AEI release',status:'pending'},
+    {sym:'Ra',name:'Radiologist',soc:'29-1224',claim:'Radiologist (noble gas, period 5) will show slower actual employment decline than Data Analyst (halogen, period 6) over 2024-2026, despite similar AI capability, because licensing and liability shells slow adoption.',evidence:'Ra DR=0.77 vs An DR=0.17. Both have high obs_auto (~98%). Noble gas family predicts slower adoption even under high capability exposure.',testDate:'BLS OES 2026',status:'pending'},
+  ];
+
+  document.getElementById('predGrid').innerHTML=preds.map(p=>`
+    <div class="pcard">
+      <div class="pcard-hdr"><div class="pcard-sym" style="color:${pvciColor(window.DATA?.find(d=>d.soc===p.soc)?.pvci||0.5)}">${p.sym}</div><div class="pcard-title">${p.name}</div></div>
+      <div class="pcard-claim">${p.claim}</div>
+      <div class="pcard-ev"><strong>Evidence basis</strong>${p.evidence}</div>
+      <div class="pcard-status"><div class="sdot dp"></div><span class="sp">Pending · test: ${p.testDate}</span></div>
+    </div>`).join('');
+
+  document.getElementById('btBody').innerHTML=[
+    ['Noble gas','Noble gas elements (col 18) will show lower mean augmentation share than Halogen elements (col 17) due to institutional barriers slowing AI adoption mode transitions','Halogen aug mean: 4.8% · Noble gas aug mean: 8.2% — OPPOSITE of prediction. Noble gas occupations show higher augmentation share, suggesting AI is used more collaboratively where protection is high. Result is directionally informative: partial support for complementarity thesis but not the specific prediction.','partial'],
+    ['Care / trust','Care/trust (col 16) will show highest augmentation share among all families','Teacher: 26.9% (confirms). Nurse RN: 7.0% (supports). Social Worker: 7.2% (supports). Mean 13.7% — highest family mean in dataset. CONFIRMED.','conf'],
+    ['Rapid substituter','Rapid substituter family (col 1) will show highest automation share','Bookkeeper: 97.3%. Cust. Service: 96.1%. Mean 97.2% — highest family mean. CONFIRMED.','conf'],
+    ['Boundary / metalloid','Boundary occupations (col 9) will show intermediate automation and augmentation shares relative to noble gas and halogen families','Researcher: auto=94.1%, aug=5.9%. Truck Driver: auto=98.0%, aug=2.0%. Mixed — not clearly intermediate. Model revision needed for DR component weighting.','partial'],
+  ].map(r=>`<tr><td><strong>${r[0]}</strong></td><td style="font-size:9.5px">${r[1]}</td><td style="font-size:9.5px">${r[2]}</td><td><span style="font-family:var(--mono);font-size:8.5px;color:${r[3]==='conf'?'var(--grn)':r[3]==='partial'?'var(--amb)':'var(--ink4)'}">${r[3]}</span></td></tr>`).join('');
+
+  document.getElementById('mcCard').innerHTML=`<div class="mc-ttl">VALENCE — Model Card</div>
+    ${mc('Model snapshot','2026.07')}${mc('Data through','July 2026')}${mc('Last recalculated','July 2026')}
+    ${mc('Core claim','A scientific classification system for AI political economy. Position is entirely derived from observable structure. Predictions are falsifiable.')}
+    ${mc('Placement algorithm','Fully emergent · no manual overrides. Decision tree: Noble gas gate (lic≥1.0 AND sov≥0.65) → Care/trust gate → Bottleneck gate → Halogen gate → Network former gate → Boundary gate → Substituter/Decomposer reactivity split.')}
+    ${mc('Period assignment','shell_score = 0.30×lic + 0.20×phys + 0.20×union + 0.20×sov + 0.10×cred. 7 threshold bins.')}
+    ${mc('TRS','Evidence-weighted update: 0.6×prior(O*NET) + 0.4×AEI_observed (where available). Prior: 0.5×routine_cog + 0.3×digitizability + 0.2×(1-social_perc).')}
+    ${mc('PVCI','6 components: digitizability(0.20), sw_ratio(0.20), comp_mediation(0.18), switching_cost(0.16), portability(0.14), concentration(0.12). Constructed index — not observed rate.')}
+    ${mc('Elements','40 main table + 8 f-block (4 lanthanide, 4 actinide). All families represented.')}
+    ${mc('AEI coverage','32/40 main-table occupations matched to AEI SOC codes. 8 use prior only.')}
+    ${mc('Uncertainty','Approximate 1σ bands on all property scores from weight uncertainty. Not formal confidence intervals.')}
+    ${mc('Known limitations','AEI = Claude usage, not economy-wide deployment. Switching cost and market concentration are priors. Isotope deltas are theory-informed, not estimated from data.')}
+    ${mc('Data vintage','O*NET 29.3 · BLS OEWS May 2024 · BLS CPS Table 42 2025 · Anthropic Economic Index May 2026')}
+    ${mc('Prediction log','6 predictions registered above with vintage 2026-07. Will not be overwritten. Scored against future data.')}`;
+
+  const _cc={'Capability':'#6651C8','Deployment':'#3E4B91','Policy':'#7B3A70','Economic':'#816000','Social':'#39734A'};
+  const _sc={'observed':'#1A6A38','emerging':'#3E4B91','forecast':'#816000','scenario':'#67655E'};
+  const _sl={'observed':'● Observed','emerging':'◑ Emerging','forecast':'◇ Forecast','scenario':'◇ Scenario'};
+  const _cb={};CATALYSTS.forEach(c=>{if(!_cb[c.category])_cb[c.category]=[];_cb[c.category].push(c)});
+  document.getElementById('catalystLog').innerHTML=Object.entries(_cb).map(([cat,items])=>`
+    <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:${_cc[cat]||'var(--ink3)'};text-transform:uppercase;letter-spacing:.08em;margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--rule)">${cat} catalysts</div>
+    ${items.map(c=>`<div class="cat-item" style="background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:11px 13px;margin-bottom:7px">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:4px;flex-wrap:wrap">
+        <div class="cat-name">${c.name}</div>
+        <span style="font-family:var(--mono);font-size:10px;color:${_sc[c.status]||'var(--ink3)'};font-weight:600">${_sl[c.status]||c.status}</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--ink4)">${c.date}</span>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">
+        ${c.families.map(f=>`<span style="font-family:var(--mono);font-size:9px;padding:2px 7px;background:var(--paper3);border:1px solid var(--rule2);border-radius:2px;color:var(--ink3)">${f}</span>`).join('')}
+      </div>
+      <div class="cat-effect">${c.effect}</div>
+    </div>`).join('')}`).join('');
+}
+
+function mc(l,v){return`<div class="mc-row"><span class="mc-l">${l}</span><span class="mc-v">${v}</span></div>`}
+function pvciComp(label,weight,val,source){const contrib=Math.round(val*weight*100);return`<div class="pvc-row"><span class="l">${label}</span><span class="w">×${Math.round(weight*100)}%</span><div class="pvc-bg"><div class="pvc-fill" style="width:${Math.round(val*100)}%"></div></div><span class="pvc-v">${contrib}%</span></div><div style="font-size:7.5px;color:var(--ink4);margin:-2px 0 5px 140px;font-style:italic">${source}</div>`}
+
+
+/* ── PRE-COMPUTED ROBUSTNESS DATA ── */
+function buildRobustness(){
+  const el = document.getElementById('robustnessContent');
+  if(!el || el.innerHTML) return;
+
+  // ── SECTION 1: Retrospective backtesting (pre-computed in data.json)
+  const backtest = window.MAIN.filter(o=>o.backtest).map(o=>({
+    sym:o.sym,name:o.name,family:o.family,
+    predicted:Math.round(o.backtest.prior_trs*100),
+    observed:Math.round(o.backtest.aei_observed*100),
+    error:Math.round(o.backtest.error*100),
+    abs_error:o.backtest.abs_error,
+    dir:o.backtest.direction
+  })).sort((a,b)=>b.abs_error-a.abs_error);
+
+  const mae = backtest.length ? backtest.reduce((s,r) => s + r.abs_error, 0) / backtest.length : 0;
+  const overCount = backtest.filter(r => r.dir === 'Over').length;
+  const underCount = backtest.filter(r => r.dir === 'Under').length;
+  const accurateCount = backtest.filter(r => r.dir === 'Accurate').length;
+
+  // Rank correlation (Spearman approximation)
+  const n = backtest.length;
+  const predRanks = [...backtest].sort((a,b) => b.predicted - a.predicted).map((r,i) => ({sym:r.sym, pr:i+1}));
+  const obsRanks = [...backtest].sort((a,b) => b.observed - a.observed).map((r,i) => ({sym:r.sym, or:i+1}));
+  const rankMap = {};
+  predRanks.forEach(r => rankMap[r.sym] = {pr: r.pr});
+  obsRanks.forEach(r => rankMap[r.sym].or = r.or);
+  const d2sum = Object.values(rankMap).reduce((s,r) => s + Math.pow((r.pr||0)-(r.or||0),2), 0);
+  const spearman = n>1 ? 1 - (6*d2sum)/(n*(n*n-1)) : 0;
+
+  // ── SECTION 2: Confidence scores (pre-computed in data.json)
+  const confData = window.MAIN.map(o=>({
+    sym:o.sym,name:o.name,family:o.family,
+    score:o.confidence_score??0, tier:o.confidence_tier||'Unknown',
+    components:o.confidence_components||[]
+  })).sort((a,b)=>b.score-a.score);
+
+  // ── SECTION 3: Parameter table ─────────────────────────────────────
+  const params = [
+    { name: 'TRS prior weight: routine_cog', value: '0.30 (=0.5×0.6)', type: 'Literature', source: 'Frey-Osborne 2013; Acemoglu-Restrepo 2022 — routine cognitive as primary substitution predictor' },
+    { name: 'TRS prior weight: digitizability', value: '0.18 (=0.3×0.6)', type: 'Expert', source: 'Defined as comp_mediation×(1-phys×0.5). Weight chosen to balance task vs. context.' },
+    { name: 'TRS AEI update weight', value: '0.40', type: 'Expert', source: 'Chosen to give majority weight to structural prior over observed use (Claude API ≠ economy).' },
+    { name: 'DR: licensing weight', value: '0.30', type: 'Literature', source: 'Highest weight: licensing is most directly AI-resistant institutional factor. Kleiner 2006.' },
+    { name: 'DR: physical presence weight', value: '0.20', type: 'Literature', source: 'Frey-Osborne 2013 manual dexterity / physical proximity as substitution barrier.' },
+    { name: 'DR: union density weight', value: '0.20', type: 'Expert', source: 'Union density as proxy for collective resistance to displacement. Autor 2014.' },
+    { name: 'DR: sovereign authority weight', value: '0.20', type: 'Expert', source: 'Statutory authority and liability as institutional barriers. Expert judgment.' },
+    { name: 'PVCI: digitizability weight', value: '0.20', type: 'Expert', source: 'Highest PVCI weight: digital output is prerequisite for platform capture.' },
+    { name: 'PVCI: market concentration', value: '0.60 (prior)', type: 'Prior', source: 'No firm-level HHI data available. Moderate concentration assumed. Future: BLS Economic Census.' },
+    { name: 'Adoption elasticity (no intervention)', value: '0.90', type: 'Literature', source: 'Acemoglu-Restrepo 2022 displacement elasticity upper bound.' },
+    { name: 'Adoption elasticity (proactive policy)', value: '0.30', type: 'Literature', source: 'Acemoglu-Restrepo 2022 lower bound with worker-centered institutions.' },
+    { name: 'Org. transition threshold', value: '30% enterprise adoption', type: 'Expert', source: 'Expert judgment: below 30% = early adopter phase; above = mainstream deployment.' },
+  ];
+
+  el.innerHTML = `
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--rule)">1 · Model calibration — evidence coverage</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:18px;max-width:760px">
+      VALENCE uses an evidence-weighted update rule: 60% structural prior (O*NET) + 40% AEI capability signal. The per-occupation comparison table was removed because it is methodologically misleading — AEI measures AI use in Claude conversations, not economy-wide deployment. The gap between prior TRS and AEI signal reflects intentional structural lag, not model error.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+      <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:16px 18px">
+        <div style="font-family:var(--serif);font-size:34px;color:var(--ink);line-height:1">${n}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:5px">Occupations with AEI data</div>
+      </div>
+      <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:16px 18px">
+        <div style="font-family:var(--serif);font-size:34px;color:var(--grn);line-height:1">${accurateCount}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:5px">Prior within ±5pp of AEI signal</div>
+      </div>
+      <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:16px 18px">
+        <div style="font-family:var(--serif);font-size:34px;color:var(--acc);line-height:1">${spearman.toFixed(2)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:5px">Rank correlation (Spearman ρ)</div>
+      </div>
+      <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:16px 18px">
+        <div style="font-family:var(--serif);font-size:34px;color:var(--amb);line-height:1">${overCount}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:5px">Prior exceeds AEI signal</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--ink3);margin-bottom:28px;padding:10px 14px;background:var(--paper2);border-left:3px solid var(--rule2);border-radius:0 4px 4px 0;max-width:760px">Over-estimation is expected. The structural prior measures theoretical substitutability; AEI measures current Claude-usage deployment. The gap is structural lag — not error. Calibration improves as AEI coverage and longitudinal data accumulate.</div>
+
+    <div style="font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--rule)">2 · Most influential inputs — ±15% perturbation analysis</div>
+    <div style="font-size:11px;color:var(--ink2);margin-bottom:12px">Each major input perturbed ±15%. Shows which variables most influence TRS for each occupation and whether the classification remains stable under perturbation.</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <select id="sensOccSelect" style="padding:8px 12px;background:var(--paper2);border:1px solid var(--rule2);border-radius:4px;font-size:12px;color:var(--ink);outline:none" onchange="renderSensitivity(this.value)">
+        <option value="">Select occupation…</option>
+        ${window.MAIN.map(o=>`<option value="${o.sym}">${o.sym} — ${o.name}</option>`).join('')}
+      </select>
+    </div>
+    <div id="sensOutput" style="margin-bottom:24px"></div>
+
+    <div style="font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--rule)">3 · Confidence scores — all occupations</div>
+    <div style="font-size:11px;color:var(--ink2);margin-bottom:12px">Composite confidence based on evidence quality, recency, source diversity, and AEI coverage. Lower confidence = wider effective uncertainty bands.</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:24px">
+      <thead><tr style="border-bottom:1px solid var(--rule2);background:var(--paper2)">
+        <th style="padding:6px 8px;text-align:left;font-family:var(--mono);font-size:9px;color:var(--ink3)">Occupation</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Confidence</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">AEI</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Iceberg</th>
+        <th style="padding:6px 8px;text-align:left;font-family:var(--mono);font-size:9px;color:var(--ink3)">Score</th>
+      </tr></thead>
+      <tbody>
+        ${confData.map(c=>`<tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:6px 8px;font-weight:500">${c.sym} ${c.name}</td>
+          <td style="padding:6px 8px"><span style="font-family:var(--mono);font-size:10px;color:${c.tier==='High'?'var(--grn)':c.tier==='Medium'?'var(--amb)':'var(--red)'}">${c.tier}</span></td>
+          <td style="padding:6px 8px;font-family:var(--mono);font-size:9.5px">${window.DATA.find(d=>d.sym===c.sym)?.has_aei?'● OBS':'○'}</td>
+          <td style="padding:6px 8px;font-family:var(--mono);font-size:9.5px">${window.DATA.find(d=>d.sym===c.sym)?.iceberg_score!=null?'● yes':'○'}</td>
+          <td style="padding:6px 8px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="width:80px;height:5px;background:var(--paper3);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(c.score*100)}%;background:${c.tier==='High'?'var(--grn)':c.tier==='Medium'?'var(--amb)':'var(--red)'};border-radius:2px"></div></div>
+              <span style="font-family:var(--mono);font-size:9.5px">${Math.round(c.score*100)}%</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+
+    <div style="font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--rule)">4 · Parameter transparency</div>
+    <div style="font-size:11px;color:var(--ink2);margin-bottom:12px">Every weight and threshold is declared here with its type (empirically estimated, literature-informed, or expert-defined) and justification.</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;font-family:var(--mono);font-size:9px;flex-wrap:wrap">
+      <span style="padding:3px 9px;background:color-mix(in srgb,var(--grn) 12%,var(--paper2));border-radius:3px;color:var(--grn)">● Literature</span>
+      <span style="padding:3px 9px;background:color-mix(in srgb,var(--acc) 10%,var(--paper2));border-radius:3px;color:var(--acc)">~ Expert</span>
+      <span style="padding:3px 9px;background:color-mix(in srgb,var(--amb) 10%,var(--paper2));border-radius:3px;color:var(--amb)">≈ Prior</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px">
+      <thead><tr style="border-bottom:1px solid var(--rule2);background:var(--paper2)">
+        <th style="padding:6px 8px;text-align:left;font-family:var(--mono);font-size:9px;color:var(--ink3)">Parameter</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Value</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Type</th>
+        <th style="padding:6px 8px;text-align:left;font-family:var(--mono);font-size:9px;color:var(--ink3)">Justification</th>
+      </tr></thead>
+      <tbody>
+        ${params.map(p=>`<tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:7px 8px;font-weight:500;font-size:11px">${p.name}</td>
+          <td style="padding:7px 8px;font-family:var(--mono);font-size:10px;text-align:center">${p.value}</td>
+          <td style="padding:7px 8px;text-align:center"><span style="font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:${p.type==='Literature'?'color-mix(in srgb,var(--grn) 12%,var(--paper2))':p.type==='Expert'?'color-mix(in srgb,var(--acc) 10%,var(--paper2))':'color-mix(in srgb,var(--amb) 10%,var(--paper2))'};color:${p.type==='Literature'?'var(--grn)':p.type==='Expert'?'var(--acc)':'var(--amb)'}">${p.type==='Literature'?'●':p.type==='Expert'?'~':'≈'} ${p.type}</span></td>
+          <td style="padding:7px 8px;color:var(--ink2);font-size:10px">${p.source}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderSensitivity(sym){
+  const el=document.getElementById('sensOutput');if(!el)return;
+  if(!sym){el.innerHTML='';return;}
+  const o=window.DATA.find(d=>d.sym===sym);if(!o)return;
+  const sens=o.sensitivity||[];
+  const base=Math.round(o.trs_post*100);
+  el.innerHTML=`
+    <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">
+      <strong>${o.name}</strong> — base TRS: ${base}%. Values below were pre-computed by pipeline.py using the declared perturbation rule.
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="border-bottom:1px solid var(--rule2);background:var(--paper2)">
+        <th style="padding:6px 8px;text-align:left;font-family:var(--mono);font-size:9px;color:var(--ink3)">Input variable</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Current value</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">TRS change</th>
+        <th style="padding:6px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Influence</th>
+      </tr></thead>
+      <tbody>${sens.map(x=>`<tr style="border-bottom:1px solid var(--rule)">
+        <td style="padding:6px 8px;font-weight:500">${x.variable}</td>
+        <td style="padding:6px 8px;font-family:var(--mono);text-align:center">${Math.round((x.current_val||0)*100)}%</td>
+        <td style="padding:6px 8px;font-family:var(--mono);text-align:center">±${x.delta_trs_pp}pp</td>
+        <td style="padding:6px 8px"><span style="font-family:var(--mono);font-size:9.5px;color:${x.influence==='High'?'var(--red)':x.influence==='Medium'?'var(--amb)':'var(--grn)'}">${x.influence}</span></td>
+      </tr>`).join('')||'<tr><td colspan="4" style="padding:8px">No sensitivity data.</td></tr>'}</tbody>
+    </table>
+    <div style="font-size:9px;color:var(--ink4);margin-top:8px">Classification stability: ${sens.filter(x=>(x.delta_trs_pp||0)>5).length===0?'Stable — no single input shifts TRS by more than 5pp':'Sensitive — '+sens.filter(x=>(x.delta_trs_pp||0)>5).length+' input(s) can shift TRS by >5pp'}.</div>`;
+}
+
+
+
+function validatePrecomputedData(rows){
+  const required=['placement_rationale','evidence_provenance','sensitivity','confidence_components','confidence_score','confidence_tier'];
+  const bad=(rows||[]).filter(o=>required.some(k=>o[k]===undefined));
+  if(bad.length){
+    console.error('VALENCE data.json is missing pre-computed fields:',bad.map(o=>o.sym));
+    const banner=document.createElement('div');
+    banner.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;padding:10px 14px;background:#8A1818;color:white;font:12px monospace;border-radius:4px';
+    banner.textContent=`Data contract error: ${bad.length} occupation(s) are missing pre-computed model fields. Re-run pipeline/pipeline.py.`;
+    document.body.appendChild(banner);
+  }
+}
+
+
+let CHANGELOG_CACHE=null;
+async function loadChangelog(){
+ const el=document.getElementById('changelogContent');if(!el)return;
+ try{if(!CHANGELOG_CACHE){const r=await fetch('./changelog.json',{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);CHANGELOG_CACHE=await r.json();}
+ const entries=(CHANGELOG_CACHE.entries||[]).slice().reverse();
+ el.innerHTML=entries.length?entries.map(e=>`<div class="changelog-entry"><div style="font-family:var(--serif);font-size:17px">${e.date} · model ${e.version}</div><div style="font:9px var(--mono);color:var(--ink3);margin:3px 0 9px">${e.summary||`${e.n_changed||0} occupation(s) materially changed`}</div>${(e.changes||[]).map(c=>`<div style="margin:8px 0"><strong>${c.sym} · ${c.name}</strong><br>${Object.entries(c.changes||{}).map(([k,v])=>`<span class="change-chip">${k}: ${formatChange(v.old)} → ${formatChange(v.new)}${v.delta_pp!=null?` (${v.delta_pp>0?'+':''}${v.delta_pp}pp)`:''}</span>`).join('')}</div>`).join('')}</div>`).join(''):'<div class="note">No material changes have been recorded yet. The next pipeline run will compare against public/data_prev.json.</div>';
+ }catch(err){el.innerHTML=`<div class="note">No changelog available yet (${err.message}). Run <code>python pipeline/pipeline.py</code> once to initialize it.</div>`;}
+}
+function formatChange(v){return typeof v==='number'?(Math.abs(v)<=1?Math.round(v*1000)/10+'%':Math.round(v*10)/10):String(v??'—')}
+
+/* ── PAGE NAV ── */
+function showPage(id,btn){
+  document.querySelectorAll('.nt').forEach(b=>b.classList.remove('act'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('act'));
+  btn.classList.add('act');
+  document.getElementById('page-'+id).classList.add('act');
+  if(id==='validation')buildValidation();
+  if(id==='cascades')buildCascades();
+  if(id==='methodology')buildMethodology();
+  if(id==='robustness')buildRobustness();
+  if(id==='compare')initCompare();
+  if(id==='changelog')loadChangelog();
+}
+
+
+
+/* ── FAMILY EXPLORER ── */
+const FAM_DETAIL={
+  'Rapid substituter':{why:'One dominant exposed function with minimal protective shells and low friction. Reacts immediately to any capability gain above performance threshold.',props:'High routine cognitive share · low institutional protection · single-function exposure · no licensing or sovereign authority',response:'Rapid, near-complete substitution once AI reaches task-performance threshold. Half-life measured in years, not decades.',analogy:'Like alkali metals — highly reactive, form bonds (new tasks) quickly, unstable in their original form.',trajectory:'Employment falls faster than BLS group projections. Remaining roles shift to oversight, exception handling, and edge cases.'},
+  'Workflow decomposer':{why:'Work breaks into automatable modules while humans remain for coordination, exceptions, and relationship continuity.',props:'Moderate routine share · modular task structure · low institutional protection · some physical presence',response:'Progressive automation of modules. Human role contracts to coordination, exceptions, and client-facing judgment.',analogy:'Like alkaline earth metals — reactive but more stable than alkali metals. Decomposes systematically rather than all at once.',trajectory:'Employment declines moderately. New roles emerge in AI workflow management and exception escalation.'},
+  'Transition':{why:'Multiple stable human-AI configurations exist. Which equilibrium forms depends on institution, regulation, tooling, and management choice — not capability alone.',props:'Mixed task structure · variable institutional protection · genuine uncertainty about AI response',response:'Outcome depends on institutional context. Same occupation may augment in one firm and substitute in another.',analogy:'Like transition metals — multiple stable oxidation states, properties vary with environment, catalytic activity.',trajectory:'High variance across deployment contexts. Policy and institutional design determine outcome more than AI capability.'},
+  'Bottleneck custodian':{why:'Retain judgment, certification, or accountability as a formal bottleneck even as upstream tasks automate. The verification step cannot be delegated without changing legal or institutional structure.',props:'Licensed or credentialed · named accountability · moderate-to-high sovereign authority · AI substitutes sub-tasks but not the sign-off function',response:'Augmentation-dominant. AI handles sub-tasks; human provides the accountable signature. Displacement requires institutional change, not just capability.',analogy:'Like post-transition metals — conductors with unique properties, not as reactive as transition metals, not as inert as noble gases.',trajectory:'Employment stable or growing. Role evolves toward AI supervision and accountability management.'},
+  'Network former':{why:'Central occupations that bond to many others, propagating AI adoption across organizational graphs. High transferable skill count means they move across task boundaries as AI reshapes work.',props:'High computer mediation · high skill transfer · low routine share · central to organizational information flow',response:'Strong augmentation. AI tools amplify output; demand expands as productivity rises. Key cascade propagators.',analogy:'Like carbon in chemistry — forms bonds with many others, enables complex structures, foundational to the system.',trajectory:'Employment grows. Role expands to managing AI-augmented teams and workflows. New hybrid roles emerge.'},
+  'Boundary / metalloid':{why:'AI substitutes some layers while amplifying judgment, synthesis, or trust in others. Sits on the substitution-complementarity boundary. Small changes in capability or policy can shift the equilibrium.',props:'Moderate shells · mixed task structure · some licensing or accountability · near the staircase',response:'Policy-sensitive. Deployment, liability rules, and tool design determine whether substitution or complementarity dominates.',analogy:'Like metalloids — properties intermediate between metals and nonmetals. Semiconductor-like: conduct under some conditions, insulate under others.',trajectory:'High uncertainty. Monitor AEI augmentation share as the leading indicator of which equilibrium is forming.'},
+  'Halogen':{why:'Digitizable output with strong platform mediation creates structural pull toward concentrated infrastructure. Even without rapid displacement, productivity gains flow to platform owners.',props:'High output digitizability · high platform software dependency · low protective shells · output easily standardized',response:'Platform capture is the primary dynamic, not just displacement. Worker and public capture structurally suppressed even when employment is stable.',analogy:'Like halogens — highly electronegative, strongly attract electrons (value) toward themselves. Form ionic bonds with platforms.',trajectory:'Employment may remain stable while value capture concentrates. Portability mandates and profit-sharing are the primary policy levers.'},
+  'Noble gas':{why:'Protective structures fill all available slots simultaneously: licensing, sovereign authority, liability, physical necessity, and often union coverage. The element is structurally complete.',props:'High licensing · high sovereign authority · named liability · physical presence · often high union density · all shells substantially filled',response:'Highly resistant to displacement. AI enters as an augmentation tool. Displacement would require simultaneous institutional change across multiple dimensions.',analogy:'Like noble gases — complete outer electron shells, chemically inert, do not readily form bonds. Stable in their current form.',trajectory:'Employment stable or growing. AI augments rather than substitutes. The risk is value capture by tools that mediate the work, not displacement.'},
+};
+
+function openFamDrawer(famKey){
+  const d=FAM_DETAIL[famKey];const fc=FAM[famKey]||{};
+  if(!d)return;
+  const members=window.MAIN.filter(o=>o.family===famKey);
+  document.getElementById('famContent').innerHTML=`
+    <button class="fam-drawer-close" onclick="document.getElementById('famDrawer').classList.remove('open')">✕ close</button>
+    <div style="font-family:var(--serif);font-size:28px;color:${fc.color||'var(--ink)'};margin-bottom:4px">${famKey}</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Col ${fc.dfam||'?'} · ${members.length} occupation${members.length!==1?'s':''}</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:16px;padding:12px 14px;background:var(--paper2);border-left:3px solid ${fc.color||'var(--rule)'};border-radius:0 4px 4px 0"><strong style="display:block;margin-bottom:4px">Why this family exists</strong>${d.why}</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:14px"><strong style="display:block;font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Structural properties</strong>${d.props}</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:14px"><strong style="display:block;font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Typical AI response</strong>${d.response}</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:14px"><strong style="display:block;font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Chemistry analogy</strong>${d.analogy}</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:18px"><strong style="display:block;font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Expected trajectory</strong>${d.trajectory}</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Members (${members.length})</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      ${members.map(m=>`<div onclick="document.getElementById('famDrawer').classList.remove('open');showPanel(window.DATA.find(d=>d.sym==='${m.sym}'));showPage('table',document.querySelector('.nt'))" style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--paper2);border:1px solid var(--rule);border-radius:3px;cursor:pointer;font-size:11px;min-width:160px">
+        <span style="font-family:var(--serif);font-size:18px;color:${fc.color||'var(--ink)'}">${m.sym}</span>
+        <div><div style="font-weight:500">${m.name}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink3)">TRS ${Math.round(m.trs_post*100)}% · PVCI ${Math.round(m.pvci*100)}%</div></div>
+      </div>`).join('')}
+    </div>
+  `;
+  document.getElementById('famDrawer').classList.add('open');
+}
+
+/* ── COMPARE VIEW ── */
+let compareSet=[];
+
+function initCompare(){
+  renderCompareGrid();
+  document.getElementById('cmpInput').value='';
+  document.getElementById('cmpSugg').style.display='none';
+}
+
+function cmpSuggest(q){
+  const sugg=document.getElementById('cmpSugg');
+  if(!q||q.length<2){sugg.style.display='none';return}
+  const matches=(window.MAIN||[]).filter(o=>o.name.toLowerCase().includes(q.toLowerCase())||o.sym.toLowerCase()===q.toLowerCase()).slice(0,8);
+  if(!matches.length){sugg.style.display='none';return}
+  const inp=document.getElementById('cmpInput');
+  const rect=inp.getBoundingClientRect();
+  sugg.style.top=(rect.bottom+4)+'px';sugg.style.left=rect.left+'px';
+  sugg.innerHTML=matches.map(o=>`<div onclick="addToCompare('${o.sym}')" style="padding:8px 14px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--paper2)'" onmouseout="this.style.background=''"><span style="font-family:var(--serif);font-size:16px;color:${famColor(o.family)}">${o.sym}</span><div><div style="font-weight:500">${o.name}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink3)">${o.family}</div></div></div>`).join('');
+  sugg.style.display='block';
+}
+
+function addToCompare(sym){
+  if(compareSet.length>=4||compareSet.includes(sym))return;
+  compareSet.push(sym);
+  document.getElementById('cmpInput').value='';
+  document.getElementById('cmpSugg').style.display='none';
+  renderCompareGrid();
+}
+
+function clearCompare(){compareSet=[];renderCompareGrid();}
+
+function renderCompareGrid(){
+  const el=document.getElementById('compareGrid');if(!el)return;
+  if(!compareSet.length){
+    el.innerHTML=`<div style="color:var(--ink3);font-size:13px;font-style:italic;grid-column:1/-1;padding:20px 0">Search and add up to 4 occupations above to compare them side by side.</div>`;
+    return;
+  }
+  const occs=compareSet.map(s=>window.DATA.find(d=>d.sym===s)).filter(Boolean);
+  const metrics=[
+    {key:'trs_post',label:'Task Replaceability (TRS)',fmt:v=>Math.round(v*100)+'%',color:'var(--red)',tip:"Probability that current AI can perform this occupation's tasks"},
+    {key:'pvci',label:'Platform Capture (PVCI)',fmt:v=>Math.round(v*100)+'%',color:'var(--amb)',tip:"Share of productivity gains flowing to platform/infrastructure owners"},
+    {key:'dr',label:'Displacement Resistance (DR)',fmt:v=>Math.round(v*100)+'%',color:'var(--grn)',tip:"Institutional, physical, legal barriers preventing human removal"},
+    {key:'tsc',label:'Transferable Skills (TSC)',fmt:v=>Math.round(v*100)+'%',color:'var(--acc)',tip:"Ability to move into adjacent roles after displacement"},
+    {key:'lir',label:'Lock-in Risk (LIR)',fmt:v=>Math.round(v*100),color:'var(--red)',tip:"Composite risk that value concentration becomes self-reinforcing"},
+    {key:'shell_licensing',label:'Licensing shell',fmt:v=>Math.round(v*100)+'%',color:'var(--f14)',tip:"Required license or statutory scope of practice"},
+    {key:'shell_physical',label:'Physical shell',fmt:v=>Math.round(v*100)+'%',color:'var(--f3)',tip:"Non-routine physical presence or site dependence"},
+    {key:'shell_union',label:'Union shell',fmt:v=>Math.round(v*100)+'%',color:'var(--f11)',tip:"Collective bargaining coverage"},
+    {key:'shell_sovereign',label:'Sovereign shell',fmt:v=>Math.round(v*100)+'%',color:'var(--f12)',tip:"Named liability or public authority"},
+  ];
+  el.style.gridTemplateColumns=`180px repeat(${occs.length},1fr)`;
+  let rows=`<div style="font-size:11px;font-weight:600;color:var(--ink3);padding:8px 0;border-bottom:2px solid var(--rule)">Metric</div>`;
+  occs.forEach(o=>{
+    rows+=`<div style="padding:8px;border-bottom:2px solid var(--rule);display:flex;align-items:center;gap:8px;cursor:pointer" onclick="showPanel(window.DATA.find(d=>d.sym==='${o.sym}'));showPage('table',document.querySelector('.nt'))">
+      <span style="font-family:var(--serif);font-size:22px;color:${famColor(o.family)}">${o.sym}</span>
+      <div><div style="font-size:12px;font-weight:600">${o.name}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink3)">${o.family}</div></div>
+      <button onclick="event.stopPropagation();compareSet=compareSet.filter(s=>s!=='${o.sym}');renderCompareGrid()" style="margin-left:auto;background:none;border:none;color:var(--ink4);cursor:pointer;font-size:14px">✕</button>
+    </div>`;
+  });
+  metrics.forEach(m=>{
+    const vals=occs.map(o=>o[m.key]||0);
+    const maxV=Math.max(...vals);
+    rows+=`<div class="tip" data-tip="${m.tip}" style="font-size:11px;color:var(--ink2);padding:10px 8px 10px 0;border-bottom:1px solid var(--rule);display:flex;align-items:center">${m.label}</div>`;
+    occs.forEach(o=>{
+      const v=o[m.key]||0;const isMax=v===maxV&&maxV>0;
+      rows+=`<div style="padding:10px 8px;border-bottom:1px solid var(--rule)">
+        <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:${isMax?m.color:'var(--ink2)'}${isMax?';':''}margin-bottom:4px">${m.fmt(v)}</div>
+        <div style="height:4px;background:var(--paper3);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round((v/Math.max(maxV,.01))*100)}%;background:${m.color};border-radius:2px"></div></div>
+      </div>`;
+    });
+  });
+  el.innerHTML=rows;
+}
+
+/* ── METHODOLOGY PAGE ── */
+function buildMethodology(){
+  const el=document.getElementById('methodContent');if(!el||el.innerHTML)return;
+  el.innerHTML=`
+    ${mSec('VALENCE in one sentence','VALENCE is a scientific classification system for AI political economy. It maps occupations by the structural properties that determine how AI enters the work, how quickly it spreads, and who captures the resulting value. Position is entirely derived from observable data. Predictions are falsifiable.')}
+    ${mSec('Placement algorithm','<strong>Period (row)</strong> = f(shell_score), discretized into 7 bins:<br>shell_score = 0.30×licensing + 0.20×physical + 0.20×union + 0.20×sovereign + 0.10×credential<br><br>Bins: P1 ≥0.90 · P2 0.70–0.90 · P3 0.55–0.70 · P4 0.40–0.55 · P5 0.25–0.40 · P6 0.12–0.25 · P7 <0.12<br><br><strong>Column (family)</strong> = decision tree on 5 observable variables:<br>1. Noble gas: lic≥1.0 AND sov≥0.65<br>2. Care/trust: lic≥0.5 AND phys≥0.85 AND sov<0.5<br>3. Bottleneck custodian: lic≥0.5 AND 0.25≤sov<0.65<br>4. Halogen: capture_pull≥0.35 AND lic<0.5 AND sov<0.2<br>5. Network former: cm≥0.47 AND (1−rc)≥0.40 AND lic<0.1 AND shell<0.25<br>6. Boundary/metalloid: shell≥0.20 OR (lic≥0.5 AND sov<0.25)<br>7. Rapid substituter: reactivity = rc×(1−shell) ≥ 0.38<br>8. Workflow decomposer: default<br><br>No manual overrides. Any new occupation runs through the same 8-gate tree.')}
+    ${mSec('Task Replaceability Score (TRS)','<strong>Prior:</strong> 0.5×routine_cognitive + 0.3×digitizability + 0.2×(1−social_perceptiveness)<br>· routine_cognitive: O*NET work activities scale IM, elements 4.A.2.a.2, 4.A.2.b.2, 4.C.3.b.2<br>· digitizability: comp_mediation × (1 − physical_presence × 0.5)<br>· social_perceptiveness: O*NET element 4.A.4.a.4<br><br><strong>Evidence-weighted update (where AEI data available):</strong><br>TRS_posterior = 0.6 × prior + 0.4 × (1 − human_only_ability_pct)<br>· human_only_ability_pct from Anthropic Economic Index API, May 2026<br><br><strong>Evidence tier:</strong> ~ ESTIMATED (Evidence-weighted posterior) or ≈ PRIOR (O*NET only)<br><strong>Uncertainty:</strong> ±8pp approximate 1σ from weight uncertainty')}
+    ${mSec('Platform Value Capture Index (PVCI)','Constructed index from 6 components. NOT an observed rate.<br><br>PVCI = 0.20×digitizability + 0.20×platform_sw_ratio + 0.18×comp_mediation + 0.16×switching_cost + 0.14×output_portability + 0.12×market_concentration<br><br>· platform_sw_ratio: O*NET hot technology share of total software skills<br>· comp_mediation: O*NET Work Context, Interacting with Computers<br>· switching_cost: proprietary software dependency proxy (prior)<br>· output_portability: 1 − physical_presence × 0.5<br>· market_concentration: 0.60 prior (future: BLS HHI)<br><br><strong>Evidence tier:</strong> ≈ PRIOR throughout<br><strong>Known gap:</strong> switching cost and market concentration are theory-informed priors, not estimated from data')}
+    ${mSec('Displacement Resistance (DR) — Protective shells','DR = 0.30×licensing + 0.20×physical + 0.20×union + 0.20×sovereign + 0.10×credential<br><br>· licensing: required license or statutory scope (binary + partial; NCSL/BLS data)<br>· physical: O*NET Physical Proximity + Face-to-Face Discussions, scale CX<br>· union: BLS CPS Table 42, 2025 — percent union members by occupational group<br>· sovereign: named liability, statutory authority, or public trust function (expert prior)<br>· credential: depth of specialised expertise proxy = 0.5×lic + 0.5×sov<br><br><strong>Evidence tier:</strong> ≈ PRIOR · union from BLS observed · licensing from NCSL/BLS')}
+    ${mSec('AI integration stage (A/T/S/D)','Current observed state of AI integration, estimated from AEI automation/augmentation shares.<br><br>A — Augmentation: obs_auto < 80% or aug_share > 15%<br>T — Transitional: 80–93% automation share<br>S — Supervised: 93–98% automation share<br>D — Delegated: obs_auto ≥ 98%<br><br><strong>Evidence tier:</strong> ~ ESTIMATED from AEI where available · ≈ PRIOR otherwise<br><strong>Note:</strong> This is an integration state, not an oxidation state in the chemical sense. Same occupation under different institutional contexts (isotopes) may have different stages.')}
+    ${mSec('Data sources and vintages','<table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:4px"><tr style="border-bottom:1px solid var(--rule)"><th style="text-align:left;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Source</th><th style="text-align:left;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Vintage</th><th style="text-align:left;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink3)">Use</th></tr><tr style="border-bottom:1px solid var(--rule)"><td style="padding:7px 8px">Anthropic Economic Index (AEI)</td><td style="padding:7px 8px;font-family:var(--mono);font-size:10px">May 2026</td><td style="padding:7px 8px;color:var(--ink2)">Observed AI use, automation/augmentation share, human-only ability</td></tr><tr style="border-bottom:1px solid var(--rule)"><td style="padding:7px 8px">O*NET</td><td style="padding:7px 8px;font-family:var(--mono);font-size:10px">29.3</td><td style="padding:7px 8px;color:var(--ink2)">Task statements, work activities, work context, software skills</td></tr><tr style="border-bottom:1px solid var(--rule)"><td style="padding:7px 8px">BLS OEWS</td><td style="padding:7px 8px;font-family:var(--mono);font-size:10px">May 2024</td><td style="padding:7px 8px;color:var(--ink2)">Employment, wages, occupational scale</td></tr><tr style="border-bottom:1px solid var(--rule)"><td style="padding:7px 8px">BLS CPS Table 42</td><td style="padding:7px 8px;font-family:var(--mono);font-size:10px">2025</td><td style="padding:7px 8px;color:var(--ink2)">Union membership by occupational group</td></tr><tr><td style="padding:7px 8px">BLS Employment Projections</td><td style="padding:7px 8px;font-family:var(--mono);font-size:10px">2023–33</td><td style="padding:7px 8px;color:var(--ink2)">10-year employment change by occupational group (BLS group anchor)</td></tr></table>')}
+    ${mSec('Known limitations','<ul style="font-size:12px;color:var(--ink2);line-height:1.7;padding-left:18px"><li>AEI represents Claude usage patterns, not economy-wide AI deployment. It is a sensor, not a census.</li><li>Switching cost and market concentration PVCI components are theory-informed priors, not estimated from firm-level data.</li><li>Isotope deltas are expert priors. Future versions will estimate from firm-level microdata.</li><li>BLS employment projections are group-level, not occupation-level. Applied as anchors, not point forecasts.</li><li>Physical presence scores from O*NET may not capture recent remote-work changes.</li><li>Family thresholds are fixed at model version 2026.07. Recalibration is planned when the next AEI release publishes.</li></ul>')}
+    ${mSec('MIT Project Iceberg integration','<strong>Iceberg Score:</strong> technical capability exposure — % of occupational skills (wage-weighted) that AI systems can currently perform. Derived from Project Iceberg methodology (Chopra et al., MIT/Oak Ridge, 2025) mapping 13,000+ AI tools to O*NET skill taxonomy.<br><br><strong>Surface Score:</strong> visible adoption today — AEI observed exposure + Ramp AI Index context.<br><br><strong>Structural Lag:</strong> Iceberg − Surface. Large gap = disruption is technically possible but blocked by organizational, institutional, or physical barriers. The lag type identifies which barrier predominates.<br><br>Nationally: Surface Index = 2.2% of labor market wage value (tech occupations). Iceberg Index = 11.7% (cognitive/administrative). The hidden mass is 5× the visible tip.<br><br>Evidence tier: ≈ PRIOR · Occupation-level scores are VALENCE estimates using Iceberg methodology, not official Project Iceberg outputs.')}
+    ${mSec('Ramp AI Index integration','Enterprise AI adoption tracker: % of Ramp-tracked businesses (~25,000 firms) that have spent on AI software tools in the trailing 30 days.<br><br>Jan 2023: 7.5% → Jun 2026: 55.0%. Year-over-year acceleration in 2026 (+12.2pp).<br><br>Census BTOS (Business Trends and Outlook Survey): 20.6% as of Jun 2026. The 34pp gap between Ramp and Census reflects faster adoption in growth-stage companies vs the broader economy.<br><br>Used in VALENCE as: (1) adoption velocity signal — are organizations accelerating or plateauing? (2) structural lag context — comparing occupation-level surface scores to economy-wide adoption baselines. (3) deployment catalyst evidence for occupation forecasts.<br><br>Evidence tier: ● OBSERVED (Ramp AI Index, Jun 2026) · Source: Ramp Financial Inc.')}
+    ${mSec('Model version','Model snapshot: 2026.07 · Data through July 2026 · Last recalculated: July 2026<br>Predictions logged with vintage 2026-07 — will not be overwritten. Scored against future data releases.')}
+  `;
+}
+
+function mSec(title,body){return`<div style="margin-bottom:24px"><div style="font-family:var(--mono);font-size:9.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid var(--rule)">${title}</div><div style="font-size:12px;color:var(--ink2);line-height:1.7">${body}</div></div>`}
+
+/* ── DOWNLOAD METHODOLOGY ── */
+function downloadMethodology(){
+  const card={
+    name:'VALENCE',snapshot:'2026.07',data_through:'July 2026',
+    placement_algorithm:{period:'shell_score = 0.30×lic + 0.20×phys + 0.20×union + 0.20×sov + 0.10×cred; 7 period bins',column:'8-gate decision tree; see methodology page'},
+    metrics:{TRS:'Evidence-weighted posterior: 0.6×prior(O*NET) + 0.4×(1-hoa_pct)(AEI)',PVCI:'6-component constructed index; weights: digitizability(0.20), sw_ratio(0.20), comp_mediation(0.18), switching_cost(0.16), portability(0.14), concentration(0.12)',DR:'0.30×lic + 0.20×phys + 0.20×union + 0.20×sov + 0.10×cred'},
+    data_sources:{AEI:'May 2026',ONET:'29.3',BLS_OEWS:'May 2024',BLS_CPS_42:'2025',BLS_Projections:'2023-33'},
+    limitations:['AEI = Claude usage, not economy-wide deployment','Switching cost and concentration are priors','Isotope deltas are expert priors','BLS projections are group-level anchors'],
+    occupations:window.MAIN.map(o=>({sym:o.sym,name:o.name,soc:o.soc,family:o.family,period:o.period,col:o.col,trs:o.trs_post,pvci:o.pvci,dr:o.dr,stage:o.oxidation_state}))
+  };
+  const blob=new Blob([JSON.stringify(card,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='valence_model_card_2026-07.json';a.click();
+}
+
+/* ── DEEP-LINK: open panel from URL hash ── */
+function checkDeepLink(){
+  const hash=window.location.hash.replace('#','');
+  if(hash&&window.DATA){
+    const o=window.DATA.find(d=>d.sym.toLowerCase()===hash.toLowerCase());
+    if(o){setTimeout(()=>{showPanel(o)},200);}
+  }
+}
+window.addEventListener('hashchange',checkDeepLink);
+setTimeout(checkDeepLink,400);
+
+/* ── SHAREABLE LINK on panel ── */
+
+/* ── ICEBERG + RAMP TAB ── */
+function icebergTab(o){
+  const ice=o.iceberg_score, surf=o.surface_score, lag=o.structural_lag;
+  if(ice===null||ice===undefined) return `<div class="note" style="margin-top:0">Iceberg Index data not yet computed for this occupation (f-block elements). Future versions will include infrastructure occupations.</div>`;
+
+  const lagPct=Math.round(lag*100);
+  const icePct=Math.round(ice*100);
+  const surfPct=Math.round(surf*100);
+  const lagType=o.lag_type||'unknown';
+  const lagColor=lagPct>50?'var(--red)':lagPct>30?'var(--amb)':'var(--grn)';
+
+  // Lag type explanations
+  const lagDesc={
+    'institutional':'Licensing, sovereign authority, or liability law prevents deployment even where AI has technical capability.',
+    'physical':'Physical presence or site-dependence requirements block automation regardless of digital capability.',
+    'physical+institutional':'Both physical requirements and institutional authority create compounding barriers to deployment.',
+    'physical+licensing':'Physical work requirements and licensing combine to slow deployment.',
+    'physical+regulatory':'Physical requirements and regulatory approval processes (e.g., AV certification) block deployment.',
+    'organizational':'Organizational inertia, integration cost, and procurement friction delay deployment of technically capable AI.',
+    'physical+organizational':'Physical requirements and organizational friction both slow deployment.',
+    'minimal':'Capability and adoption are closely aligned — deployment has largely caught up with technical possibility.',
+    'institutional+organizational':'Both regulatory and organizational barriers compound the deployment lag.',
+  };
+
+  return`
+    <div class="sec" style="margin-top:0">Surface vs Iceberg exposure</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.6;margin-bottom:14px;padding:10px 12px;background:var(--paper2);border-left:3px solid var(--acc);border-radius:0 3px 3px 0">
+      <strong style="display:block;margin-bottom:3px">Iceberg = Capability Map · Surface = Adoption Map · Gap = Structural Lag</strong>
+      What AI <em>can</em> technically do for this occupation vs what organizations are <em>actually doing</em>. The gap is the structural lag — where disruption is likely but not yet realized.
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+        <span style="width:130px;flex-shrink:0;color:var(--ink2)">Surface adoption</span>
+        <div style="flex:1;height:10px;background:var(--paper3);border-radius:3px;overflow:hidden;position:relative">
+          <div style="height:100%;width:${surfPct}%;background:#1A3A5A;border-radius:3px"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;width:32px;text-align:right">${surfPct}%</span>
+      </div>
+      <div style="font-size:9.5px;color:var(--ink3);margin:-3px 0 10px 138px;font-style:italic">● Observed adoption — what organizations are currently doing with AI for this occupation</div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+        <span style="width:130px;flex-shrink:0;color:var(--ink2)">Iceberg capability</span>
+        <div style="flex:1;height:10px;background:var(--paper3);border-radius:3px;overflow:hidden;position:relative">
+          <div style="height:100%;width:${icePct}%;background:#4A4A5C;border-radius:3px"></div>
+          <div style="position:absolute;top:0;left:${surfPct}%;width:${icePct-surfPct}%;height:100%;background:rgba(74,74,92,.25);border-left:2px dashed #4A4A5C"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;width:32px;text-align:right">${icePct}%</span>
+      </div>
+      <div style="font-size:9.5px;color:var(--ink3);margin:-3px 0 10px 138px;font-style:italic">≈ PRIOR · MIT Project Iceberg — % of skills AI systems can technically perform (wage-weighted)</div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+        <span style="width:130px;flex-shrink:0;font-weight:600;color:${lagColor}">Structural lag</span>
+        <div style="flex:1;height:10px;background:var(--paper3);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${lagPct}%;background:${lagColor};border-radius:3px"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;width:32px;text-align:right;color:${lagColor}">${lagPct}%</span>
+      </div>
+      <div style="font-size:9.5px;color:${lagColor};margin:-3px 0 6px 138px;font-style:italic">Gap between capability and adoption — where disruption is likely but not yet realized</div>
+    </div>
+
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;margin-bottom:12px">
+      <div style="font-family:var(--mono);font-size:8.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Lag type: ${lagType}</div>
+      <div style="font-size:11px;color:var(--ink2);line-height:1.55">${lagDesc[lagType]||'See element panel for full structural analysis.'}</div>
+    </div>
+
+    <div class="sec">Enterprise AI adoption context (Ramp AI Index)</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.6;margin-bottom:10px">
+      <strong>${RAMP_CURRENT}%</strong> of Ramp-tracked businesses spent on AI tools in June 2026 (up from 7.5% in Jan 2023). Census BTOS: <strong>${CENSUS_CURRENT}%</strong>. The 34pp gap between Ramp and Census reflects faster adoption among Ramp's customer base (growth-stage companies) vs the broader economy.
+    </div>
+    <div id="rampChartWrap" style="position:relative;width:100%;height:130px;margin-bottom:8px">
+      <canvas id="rampChart" role="img" aria-label="Ramp AI Index adoption over time"></canvas>
+    </div>
+    <div style="font-size:9px;color:var(--ink4);line-height:1.5">Source: Ramp AI Index (% of businesses with AI tool spend, 30-day trailing) · U.S. Census Bureau Business Trends and Outlook Survey (BTOS) · Data through June 2026.</div>
+
+    <div class="sec">Structural interpretation — ${o.name}</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:10px">
+      ${lag>0.45?
+        `<strong>Large structural lag (${lagPct}pp).</strong> AI capability substantially exceeds current organisational deployment for ${o.name}. The occupation is a candidate for near-term disruption once the <em>${lagType}</em> barrier erodes.`:
+      lag>0.25?
+        `<strong>Moderate structural lag (${lagPct}pp).</strong> Capability exceeds adoption for ${o.name}. Disruption is likely but paced by how quickly the <em>${lagType}</em> barrier resolves.`:
+        `<strong>Low structural lag (${lagPct}pp).</strong> Adoption has largely caught up with AI capability. Further disruption depends on new capability advances rather than organisational lag.`
+      }
+    </div>
+
+    <div class="sec">Causal pathway</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.7;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;font-family:var(--mono);font-size:9.5px">
+        <span style="background:color-mix(in srgb,#4A4A5C 12%,var(--paper2));border:1px solid var(--rule);border-radius:3px;padding:3px 8px">AI Capability<br><span style="color:var(--grn);font-size:8.5px">${icePct}%</span></span>
+        <span style="color:var(--ink4)">→</span>
+        <span style="background:color-mix(in srgb,#3E4B91 12%,var(--paper2));border:1px solid var(--rule);border-radius:3px;padding:3px 8px">Enterprise Adoption<br><span style="color:#3E4B91;font-size:8.5px">${surfPct}%</span></span>
+        <span style="color:var(--ink4)">→</span>
+        <span style="background:color-mix(in srgb,var(--amb) 10%,var(--paper2));border:1px solid var(--rule);border-radius:3px;padding:3px 8px">Org. Restructuring<br><span style="color:var(--amb);font-size:8.5px">lag: ${lagPct}pp</span></span>
+        <span style="color:var(--ink4)">→</span>
+        <span style="background:color-mix(in srgb,var(--red) 10%,var(--paper2));border:1px solid var(--rule);border-radius:3px;padding:3px 8px">Occupational Change<br><span style="color:var(--red);font-size:8.5px">TRS ${Math.round(o.trs_post*100)}%</span></span>
+        <span style="color:var(--ink4)">→</span>
+        <span style="background:color-mix(in srgb,var(--f13) 10%,var(--paper2));border:1px solid var(--rule);border-radius:3px;padding:3px 8px">Value Capture<br><span style="color:var(--f13);font-size:8.5px">PVCI ${Math.round(o.pvci*100)}%</span></span>
+      </div>
+      <div style="font-size:10px;color:var(--ink3)">Moderating variables: licensing (${Math.round(o.shell_licensing*100)}%), physical presence (${Math.round(o.shell_physical*100)}%), sovereign authority (${Math.round(o.shell_sovereign*100)}%), union density (${Math.round(o.shell_union*100)}%)</div>
+    </div>
+
+    <div class="sec">TRS — formal definition</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.6;margin-bottom:10px">
+      <strong>TRS = ${Math.round(o.trs_post*100)}%</strong> — the probability that ${o.name} undergoes significant structural transformation within the 10-year forecast horizon (2024–2034), defined as &gt;30% of task-hours redistributed to AI or new roles.<br>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--ink3)">Prior: ${Math.round(o.trs_prior*100)}% (O*NET) → Posterior: ${Math.round(o.trs_post*100)}% (${o.has_aei?'Evidence-weighted update: AEI May 2026':'prior only — no AEI data'})</span>
+    </div>
+
+    <div class="sec">Confidence &amp; evidence weights</div>
+    <div style="font-size:11px;color:var(--ink2);line-height:1.65;margin-bottom:4px">
+      ${(o.confidence_components||[]).map(e=>`<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:5px;padding:5px 8px;background:var(--paper2);border-radius:3px">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--grn);width:20px;flex-shrink:0">●</span>
+        <span style="font-size:10.5px;font-weight:500;flex-shrink:0;min-width:160px">${e.source}</span>
+        <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;width:${Math.round((e.contribution||0)*100)}%;background:var(--grn);border-radius:2px"></div></div>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--ink3);width:28px;text-align:right">${Math.round((e.contribution||0)*100)}%</span>
+      </div><div style="font-size:9px;color:var(--ink3);margin:-2px 0 4px 28px;font-style:italic">${e.note||''}</div>`).join('')||'<div>No confidence components in data.json.</div>'}
+    </div>
+    <div class="note">Confidence: ${o.confidence_tier||'Unknown'} (${Math.round((o.confidence_score||0)*100)}%). Components and provenance are pre-computed by pipeline.py; the browser does not assign weights.</div>
+  `;
+}
+
+let rampChart=null;
+function renderRampChart(){
+  const cv=document.getElementById('rampChart');if(!cv)return;
+  if(rampChart){rampChart.destroy();rampChart=null;}
+  rampChart=new Chart(cv,{type:'line',data:{
+    labels:RAMP_SERIES.map(d=>d.d),
+    datasets:[
+      {label:'Ramp AI Index',data:RAMP_SERIES.map(d=>d.r),borderColor:'#2A2A8A',backgroundColor:'rgba(42,42,138,.06)',borderWidth:2,pointRadius:0,fill:true,tension:.4},
+      {label:'Census BTOS',data:[null,null,null,null,null,null,null,null,null,null,20.6],borderColor:'#7A5010',backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,fill:false,tension:.3,borderDash:[4,3]},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9,family:'JetBrains Mono'},color:'#67655E',boxWidth:16,boxHeight:2}},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y?.toFixed(1)}%`},backgroundColor:'#F2EFE6',titleColor:'#1C1C14',bodyColor:'#555548',borderColor:'#C9C5B8',borderWidth:1}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#9C9990',font:{size:8.5,family:'JetBrains Mono'},maxRotation:0,maxTicksLimit:6}},
+      y:{min:0,max:65,grid:{color:'rgba(28,28,20,.05)'},ticks:{color:'#9C9990',font:{size:8.5,family:'JetBrains Mono'},callback:v=>v+'%'}}
+    }
+  }});
+}
+
+
+
+/* ── GUIDED TOUR ── */
+const TOUR_STEPS = [
+  {
+    title: 'What problem is VALENCE solving?',
+    body: 'Existing measures — employment projections, task automation scores — answer different questions. VALENCE focuses on forecasting how occupations are likely to transform structurally: not just whether jobs disappear, but how the nature of work changes and who captures the value.',
+    target: null, // homepage/table visible
+    pos: 'center',
+  },
+  {
+    title: 'How does VALENCE answer that question?',
+    body: 'Four forces combine into a transformation forecast: AI capability (what AI can technically do), adoption (what organisations actually deploy), institutional resistance (licensing, physical presence, unions), and economic incentives (who captures the value). Every metric traces back to this framework.',
+    target: '.stair-lbl',
+    pos: 'bottom',
+  },
+  {
+    title: 'Why a periodic table?',
+    body: 'The periodic table is a classification system — not a ranking. Occupations are grouped by shared transformation dynamics: how AI enters the work, how quickly adoption spreads, and where value flows. Position is fully algorithmic. Column = structural family. Row = institutional protection.',
+    target: null,
+    targetFn: () => { showPage('table', document.querySelector('.nt')); return document.querySelector('.blk-hdr'); },
+    pos: 'bottom',
+    action: () => showPage('table', document.querySelector('.nt')),
+  },
+  {
+    title: 'How do I explore an occupation?',
+    body: 'Click any element to open its Occupation Health Card. Try the Data Analyst (An) — a halogen in Column 17 with high platform capture dynamics — or Judge (Jd), a noble gas in Period 1 with maximum institutional protection.',
+    target: null,
+    targetFn: () => { showPage('table', document.querySelector('.nt')); return document.querySelector('.el[data-sym="An"]'); },
+    pos: 'right',
+    action: () => showPage('table', document.querySelector('.nt')),
+  },
+  {
+    title: 'What is an Occupation Health Card?',
+    body: 'The headline shows TRS — the transformation probability — with an uncertainty band and evidence coverage score. Below it: the AI integration stage (A/T/S/D), a plain-English summary, and a note that TRS measures transformation, not job loss.',
+    target: '#panel',
+    pos: 'left',
+    action: () => { const an = window.DATA?.find(d=>d.sym==='An'); if(an) showPanel(an); },
+  },
+  {
+    title: 'How should I interpret the forecast?',
+    body: 'The Trajectory section shows three layers: Capability (what AI can do), Occupation Adoption (what this specific occupation currently uses — not the economy-wide 55%), and Transformation (TRS). The fan chart shows employment scenarios under different policy assumptions.',
+    target: '#panel',
+    pos: 'left',
+  },
+  {
+    title: 'Where does the evidence come from?',
+    body: 'The Evidence section lists every source that contributed to this forecast — O*NET task structure, MIT Project Iceberg capability scores, Anthropic Economic Index (AEI) observed data, and BLS projections. Each source shows its model weight, contribution, and evidence tier (● Observed vs ≈ Prior).',
+    target: '#panel',
+    pos: 'left',
+  },
+  {
+    title: 'How does VALENCE stay current?',
+    body: 'When new data arrives (each AEI release, new benchmark results, policy changes), the pipeline reruns and updates the forecast. The Model Changelog records exactly which occupations changed, by how much, and why — preserving the history of predictions.',
+    target: null,
+    targetFn: () => document.querySelector('[onclick*="changelog"]'),
+    pos: 'bottom',
+    action: () => { window.scrollTo({top:0,behavior:'smooth'}); },
+  },
+  {
+    title: "You're ready to explore",
+    body: 'Search any occupation using the search bar. Compare groups in the Compare tab. Inspect evidence in each Occupation Health Card. Run sensitivity analysis in the Robustness tab. Every number traces back to a documented source and formula.',
+    target: null,
+    targetFn: () => { window.scrollTo({top:0,behavior:'smooth'}); return document.querySelector('.srch'); },
+    pos: 'bottom',
+    isLast: true,
+  },
+];
+
+let tourIdx = 0;
+let tourPrevHighlight = null;
+
+function tourStart(){
+  tourIdx = 0;
+  document.getElementById('tourOverlay').style.display = 'block';
+  tourRender();
+}
+
+function tourSkip(){
+  document.getElementById('tourOverlay').style.display = 'none';
+  tourClearHighlight();
+  // tour dismissed (not stored — will show again on next load)
+}
+
+function tourNext(){
+  tourClearHighlight();
+  tourIdx++;
+  if(tourIdx >= TOUR_STEPS.length){ tourSkip(); return; }
+  tourRender();
+}
+
+function tourClearHighlight(){
+  if(tourPrevHighlight){ tourPrevHighlight.classList.remove('tour-highlight'); tourPrevHighlight=null; }
+}
+
+function tourRender(){
+  const step = TOUR_STEPS[tourIdx];
+  if(!step) return;
+
+  // Run any setup action
+  if(step.action) step.action();
+
+  document.getElementById('tourStep').textContent = `Step ${tourIdx+1} of ${TOUR_STEPS.length}`;
+  document.getElementById('tourTitle').textContent = step.title;
+  document.getElementById('tourBody').innerHTML = step.body;
+  document.getElementById('tourNextBtn').textContent = step.isLast ? 'Start exploring ✓' : 'Next →';
+
+  // Pips
+  document.getElementById('tourPips').innerHTML = TOUR_STEPS.map((_,i)=>
+    `<span class="${i===tourIdx?'active':''}"></span>`).join('');
+
+  // Highlight target
+  tourClearHighlight();
+  const targetEl = step.targetFn ? step.targetFn() : (step.target ? document.querySelector(step.target) : null);
+  if(targetEl){ targetEl.classList.add('tour-highlight'); tourPrevHighlight=targetEl; }
+
+  // Position card next to target (never overlapping it)
+  const card = document.getElementById('tourCard');
+  card.style.transform = 'none';
+
+  function positionCard(){
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const cw = 336, ch = Math.min(card.scrollHeight || 400, vh - 80);
+
+    if(!targetEl || step.pos==='center'){
+      card.style.top  = Math.round((vh - ch)/2) + 'px';
+      card.style.left = Math.round((vw - cw)/2) + 'px';
+      card.style.right = 'auto'; card.style.bottom = 'auto';
+      return;
+    }
+
+    // Get fresh rect after scroll settles
+    const r = targetEl.getBoundingClientRect();
+    const pad = 18; // gap between target and card
+
+    // Try four positions in priority order, pick first that fits fully in viewport
+    const candidates = [
+      // Right of target
+      { l: r.right + pad, t: Math.max(16, Math.min(r.top, vh - ch - 16)) },
+      // Left of target
+      { l: r.left - cw - pad, t: Math.max(16, Math.min(r.top, vh - ch - 16)) },
+      // Below target
+      { l: Math.max(16, Math.min(r.left, vw - cw - 16)), t: r.bottom + pad },
+      // Above target
+      { l: Math.max(16, Math.min(r.left, vw - cw - 16)), t: r.top - ch - pad },
+    ];
+
+    // Preferred position from step config
+    const prefMap = { right:0, left:1, bottom:2, top:3 };
+    const pref = prefMap[step.pos] ?? 0;
+    // Reorder so preferred is tried first
+    const ordered = [candidates[pref], ...candidates.filter((_,i)=>i!==pref)];
+
+    let chosen = ordered[0]; // fallback
+    for(const c of ordered){
+      if(c.l >= 8 && c.l + cw <= vw - 8 && c.t >= 8 && c.t + ch <= vh - 8){
+        chosen = c; break;
+      }
+    }
+
+    // Final clamp to viewport
+    const finalL = Math.max(8, Math.min(chosen.l, vw - cw - 8));
+    const finalT = Math.max(8, Math.min(chosen.t, vh - ch - 8));
+
+    card.style.left   = finalL + 'px';
+    card.style.top    = finalT + 'px';
+    card.style.right  = 'auto';
+    card.style.bottom = 'auto';
+  }
+
+  if(!targetEl || step.pos==='center'){
+    positionCard();
+  } else {
+    // Scroll target to centre of viewport first, then position card
+    targetEl.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+    setTimeout(positionCard, 380);
+  }
+}
+
+// Start tour on every page load
+setTimeout(tourStart, 1200);
+
+
+/* ── SEARCH ── */
+const ALIAS={'nurse':['Nrs','Nr'],'doctor':['Sg','Ps'],'surgeon':['Sg'],'judge':['Jd'],'pilot':['Pl'],'teacher':['Tc'],'social worker':['Sw'],'machinist':['Mw'],'chef':['Ck'],'software':['Sd'],'developer':['Sd'],'accountant':['Ac'],'manager':['Mg'],'truck':['Tf'],'driver':['Tf'],'sales':['Sa','Tl'],'radiologist':['Ra'],'lawyer':['La'],'writer':['Wr'],'analyst':['An'],'warehouse':['Wa'],'customer':['Cs'],'paralegal':['Pr'],'bookkeeper':['Bk'],'transcriptionist':['Tr'],'researcher':['Rs'],'financial':['Fl'],'receptionist':['Re'],'data entry':['De'],'telemarketer':['Tl'],'loan':['Li'],'cashier':['Ca'],'admin':['Ad'],'retail':['Rt'],'claims':['Cp'],'tax':['Tb'],'travel':['Tp'],'electrician':['El'],'psychiatrist':['Ps'],'fire':['Fd'],'grid':['Gt'],'nuclear':['Np'],'air traffic':['At'],'defense':['Df'],'logistics':['Lx'],'semiconductor':['Sm'],'data center':['Dc']};
+
+function doSearch(){
+  const q=document.getElementById('srch').value.toLowerCase().trim();if(!q||!window.DATA)return;
+  showPage('table',document.querySelector('.nt'));
+  const d=window.DATA.find(o=>o.name.toLowerCase().includes(q)||o.sym.toLowerCase()===q);
+  if(d){hideSug();showPanel(d);return}
+  const m=new Set();Object.entries(ALIAS).forEach(([k,v])=>{if(q.includes(k)||k.includes(q))v.forEach(s=>m.add(s))});
+  if(m.size>0){const r=[...m].map(s=>window.DATA.find(o=>o.sym===s)).filter(Boolean);if(r.length===1){hideSug();showPanel(r[0]);return}showSug(q,r);return}
+  const w=window.DATA.filter(o=>q.split(' ').some(x=>x.length>3&&o.name.toLowerCase().includes(x)));
+  if(w.length>0){if(w.length===1){hideSug();showPanel(w[0]);return}showSug(q,w);return}
+  showSug(q,(window.MAIN||[]).slice(0,4));
+}
+function showSug(q,m){
+  document.getElementById('sugTxt').textContent=`No exact match for "${q}" —`;
+  const c=document.getElementById('sugChips');c.innerHTML='';
+  m.slice(0,5).forEach(o=>{const ch=document.createElement('div');ch.className='sc';ch.textContent=`${o.sym} ${o.name}`;ch.onclick=()=>{hideSug();showPanel(o)};c.appendChild(ch)});
+  document.getElementById('sug').classList.add('vis');
+}
+function hideSug(){document.getElementById('sug').classList.remove('vis')}
+document.getElementById('srch').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+</script>
+</body>
+</html>

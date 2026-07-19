@@ -1,0 +1,272 @@
+{
+  "_version": "2026.07",
+  "_description": "All VALENCE model weights. Every parameter has a type (literature/expert/prior) and justification. Change this file to recalibrate the model; pipeline.py reads it on every run.",
+  "trs": {
+    "_description": "Task Replaceability Score = probability of significant structural transformation within 10 years (>30% task-hours redistributed)",
+    "prior_weights": {
+      "routine_cog": {
+        "value": 0.5,
+        "type": "literature",
+        "source": "Frey & Osborne 2013; Acemoglu & Restrepo 2018 \u2014 routine cognitive task share is the primary predictor of AI substitutability",
+        "justification": "Highest prior weight: routine cognitive work is directly and most reliably measured by O*NET and is the clearest substitution signal"
+      },
+      "digitizability": {
+        "value": 0.3,
+        "type": "expert",
+        "source": "Constructed variable: comp_mediation \u00d7 (1 - physical_presence \u00d7 0.5)",
+        "justification": "Digital output is prerequisite for AI substitution; physical presence reduces but does not eliminate digitizability"
+      },
+      "social_perceptiveness_inverse": {
+        "value": 0.2,
+        "type": "literature",
+        "source": "Frey & Osborne 2013 \u2014 social intelligence as substitution barrier",
+        "justification": "Inverse of social perceptiveness: high social skill = harder to automate"
+      }
+    },
+    "update_weights": {
+      "prior": {
+        "value": 0.6,
+        "type": "expert",
+        "justification": "Majority weight to structural prior: AEI measures Claude usage patterns, not economy-wide AI deployment. Prior is more generalisable."
+      },
+      "aei_observed": {
+        "value": 0.4,
+        "type": "expert",
+        "justification": "Significant but minority weight: AEI provides direct observed signal but is biased toward Claude-using organisations"
+      }
+    },
+    "uncertainty_sigma": {
+      "value": 0.08,
+      "type": "expert",
+      "justification": "Approximate 1\u03c3 from weight uncertainty; not a formal confidence interval. Treat as order-of-magnitude uncertainty bound."
+    }
+  },
+  "dr": {
+    "_description": "Displacement Resistance = institutional, physical, and legal friction preventing human removal after capability threshold is met",
+    "shell_weights": {
+      "licensing": {
+        "value": 0.3,
+        "type": "literature",
+        "source": "Kleiner 2006; BLS/NCSL licensing data",
+        "justification": "Highest shell weight: licensing is the most direct and legally enforceable barrier to AI substitution"
+      },
+      "physical": {
+        "value": 0.2,
+        "type": "literature",
+        "source": "Frey & Osborne 2013 \u2014 manual dexterity and physical proximity as substitution barriers; O*NET scale CX",
+        "justification": "Physical presence requirement directly blocks digital-first AI substitution"
+      },
+      "union": {
+        "value": 0.2,
+        "type": "expert",
+        "source": "Autor 2014; BLS CPS Table 42 2025",
+        "justification": "Union density proxies collective resistance to displacement and bargaining power over AI adoption"
+      },
+      "sovereign": {
+        "value": 0.2,
+        "type": "expert",
+        "source": "Expert judgment \u2014 statutory authority and named liability as institutional barriers",
+        "justification": "Sovereign authority (judicial, public safety, constitutional function) creates displacement barriers beyond market forces"
+      },
+      "credential": {
+        "value": 0.1,
+        "type": "expert",
+        "justification": "Depth of specialised expertise proxy; lower weight because it partially overlaps with licensing"
+      }
+    }
+  },
+  "pvci": {
+    "_description": "Platform Value Capture Index = share of productivity gains flowing to platform/infrastructure owners rather than workers",
+    "component_weights": {
+      "digitizability": {
+        "value": 0.2,
+        "type": "expert",
+        "justification": "Digital output is prerequisite for platform mediation; highest PVCI weight"
+      },
+      "platform_sw_ratio": {
+        "value": 0.2,
+        "type": "prior",
+        "source": "O*NET hot technology share of total software skills",
+        "justification": "Hot technology dependency proxies platform lock-in"
+      },
+      "comp_mediation": {
+        "value": 0.18,
+        "type": "prior",
+        "source": "O*NET Work Context: Interacting with Computers",
+        "justification": "Computer mediation degree indicates output routability through platform"
+      },
+      "switching_cost": {
+        "value": 0.16,
+        "type": "prior",
+        "justification": "Proprietary software dependency proxy. Future: estimate from firm-level spend concentration."
+      },
+      "output_portability": {
+        "value": 0.14,
+        "type": "expert",
+        "justification": "Inverse of physical presence: digital output is portable and platform-capturable"
+      },
+      "market_concentration": {
+        "value": 0.12,
+        "type": "prior",
+        "justification": "Assumed 0.60 (moderate concentration) for all occupations. Future: BLS Economic Census HHI."
+      }
+    },
+    "market_concentration_prior": {
+      "value": 0.6,
+      "type": "prior",
+      "justification": "No firm-level HHI data available. Moderate concentration assumed as conservative estimate."
+    }
+  },
+  "family_gates": {
+    "_description": "Column (family) assignment: 8-gate decision tree applied in order. First gate that fires wins.",
+    "noble_gas": {
+      "lic_threshold": 1.0,
+      "sov_threshold": 0.65,
+      "type": "expert",
+      "justification": "Both licensing AND sovereign authority must be near-maximum for noble gas classification. Strong binary institutional facts."
+    },
+    "care_trust": {
+      "lic_threshold": 0.5,
+      "phys_threshold": 0.85,
+      "sov_max": 0.5,
+      "type": "expert",
+      "justification": "Licensed + high physical + low sovereign = relational protection not institutional authority"
+    },
+    "bottleneck": {
+      "lic_threshold": 0.5,
+      "sov_min": 0.25,
+      "sov_max": 0.65,
+      "type": "expert",
+      "justification": "Licensed + moderate sovereign = accountability bottleneck without full noble gas protection"
+    },
+    "halogen": {
+      "capture_pull_threshold": 0.4,
+      "lic_max": 0.5,
+      "sov_max": 0.2,
+      "type": "expert",
+      "justification": "High capture pull + no institutional protection = platform capture magnet",
+      "_note": "Raised from 0.35 to 0.40 to exclude physical occupations (Machinist, Warehouse, Stock Clerk, Sales Agent) whose O*NET software ratios are high due to tool use, not digitizable output. Ca and Sd are Halogens via domain_overrides."
+    },
+    "network_former": {
+      "cm_threshold": 0.47,
+      "judgment_threshold": 0.4,
+      "lic_max": 0.1,
+      "shell_max": 0.25,
+      "type": "expert",
+      "justification": "High computer mediation + low routine + low protection = organisational hub"
+    },
+    "boundary": {
+      "shell_min": 0.2,
+      "type": "expert",
+      "justification": "Moderate shells = staircase zone, policy-sensitive"
+    },
+    "rapid_substituter": {
+      "reactivity_threshold": 0.38,
+      "type": "expert",
+      "justification": "reactivity = routine_cog \u00d7 (1 - shell_score). High reactivity + low shells = fast substitution."
+    }
+  },
+  "period_bins": {
+    "_description": "Period (row) assignment from shell_score",
+    "type": "expert",
+    "bins": [
+      {
+        "period": 1,
+        "min": 0.9,
+        "max": 1.0,
+        "label": "Max protection"
+      },
+      {
+        "period": 2,
+        "min": 0.7,
+        "max": 0.9,
+        "label": "High protection"
+      },
+      {
+        "period": 3,
+        "min": 0.55,
+        "max": 0.7,
+        "label": "Moderate-high"
+      },
+      {
+        "period": 4,
+        "min": 0.4,
+        "max": 0.55,
+        "label": "Moderate"
+      },
+      {
+        "period": 5,
+        "min": 0.25,
+        "max": 0.4,
+        "label": "Low-moderate"
+      },
+      {
+        "period": 6,
+        "min": 0.12,
+        "max": 0.25,
+        "label": "Low protection"
+      },
+      {
+        "period": 7,
+        "min": 0.0,
+        "max": 0.12,
+        "label": "Minimal shells"
+      }
+    ]
+  },
+  "forecast": {
+    "elasticity_no_intervention": {
+      "value": 0.9,
+      "type": "literature",
+      "source": "Acemoglu & Restrepo 2022 \u2014 displacement elasticity upper bound"
+    },
+    "elasticity_proactive_policy": {
+      "value": 0.3,
+      "type": "literature",
+      "source": "Acemoglu & Restrepo 2022 \u2014 lower bound with worker-centred institutions"
+    },
+    "org_transition_threshold": {
+      "value": 0.3,
+      "type": "expert",
+      "justification": "Expert judgment: below 30% enterprise adoption = early adopter phase; above = mainstream deployment"
+    }
+  },
+  "lir": {
+    "_description": "Lock-in Risk = composite risk that value concentration becomes self-reinforcing",
+    "weights": {
+      "trs": 0.3,
+      "pvci": 0.3,
+      "dr_inverse": 0.25,
+      "emp_scale": 0.15
+    },
+    "type": "expert",
+    "justification": "Equal weight to capability and capture risk (TRS, PVCI); displacement resistance dampens; employment scale amplifies systemic risk"
+  },
+  "confidence": {
+    "_description": "Confidence score based on evidence quality, recency, coverage, and source diversity",
+    "evidence_weights": {
+      "aei_observed": 0.35,
+      "onet_coverage": 0.2,
+      "iceberg_score": 0.2,
+      "bls_projection": 0.15,
+      "multi_source_bonus": 0.1
+    },
+    "tiers": {
+      "high": 0.75,
+      "medium": 0.5
+    }
+  },
+  "iceberg": {
+    "_description": "MIT Project Iceberg integration weights",
+    "note": "Occupation-level iceberg scores are VALENCE estimates using Iceberg methodology (Chopra et al., 2025). Not official Project Iceberg outputs.",
+    "trs_weight": 0.25,
+    "type": "prior"
+  },
+  "ramp": {
+    "_description": "Ramp AI Index context",
+    "current_rate": 54.95,
+    "census_rate": 20.6,
+    "vintage": "June 2026",
+    "adoption_transition_threshold": 0.3
+  }
+}

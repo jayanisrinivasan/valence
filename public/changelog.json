@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "date": "2026-07-18",
+      "version": "2026.07",
+      "n_changed": 0,
+      "summary": "Baseline snapshot registered; future pipeline runs will be compared against this state",
+      "thresholds": {
+        "trs_delta_pp": 2.0,
+        "family": "any change",
+        "confidence_tier": "any change"
+      },
+      "changes": []
+    }
+  ]
+}
